@@ -9,8 +9,8 @@ public class PlayerController : MonoBehaviour
     public Transform healthBar;
     public CameraController cameraController;
 
-    [Header("Keybinds")]
-    public KeyCode buttonAttack;
+    [Header("Main Settings")]
+    public int playerNum;
 
     [Header("Move Power")]
     public float movePower;
@@ -25,6 +25,8 @@ public class PlayerController : MonoBehaviour
     private int _health = 100;
     private float _healthSmooth = 100f;
 
+    private bool _abilityKeyInUse = false;
+
     void Start()
     {
         rigidbody = GetComponent<Rigidbody2D>();
@@ -35,17 +37,21 @@ public class PlayerController : MonoBehaviour
         UpdateCooldowns();
         UpdateUI();
         var speed = rigidbody.velocity.magnitude;
-        if (Input.GetKeyDown(buttonAttack) && speed > attackMinSpeed && speed < attackMaxSpeed && _attackCooldown == 0f)
+        if (Input.GetAxis($"P{playerNum} Ability") > 0f && !_abilityKeyInUse && speed > attackMinSpeed && speed < attackMaxSpeed && _attackCooldown == 0f)
         {
             rigidbody.AddForce(rigidbody.velocity.normalized * attackPower, ForceMode2D.Impulse);
             _attackCooldown = attackCooldown;
+            _abilityKeyInUse = true;
+        }
+        if (Input.GetAxis($"P{playerNum} Ability") == 0f)
+        {
+            _abilityKeyInUse = false;
         }
     }
 
-
     void FixedUpdate()
     {
-        var moveVector = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")).normalized;
+        var moveVector = new Vector2(Input.GetAxis($"P{playerNum} Horizontal"), Input.GetAxis($"P{playerNum} Vertical")).normalized;
         rigidbody.AddForce(moveVector * movePower);
     }
 
@@ -54,7 +60,7 @@ public class PlayerController : MonoBehaviour
         var impact = collision.relativeVelocity * rigidbody.mass;
         cameraController.Shove(impact.normalized * Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f));
         var damage = Mathf.RoundToInt(impact.magnitude);
-        _health -= damage;
+        // _health -= damage;
         Debug.Log(_health);
     }
 
