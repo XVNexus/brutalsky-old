@@ -9,11 +9,12 @@ public class CameraController : MonoBehaviour
     public float shoveSpeed;
     public float shoveForce;
 
-    [Header("Rock settings")]
-    public float rockFade;
-
     [Header("Shake settings")]
     public float shakeFade;
+    public float shakeInterval;
+
+    [Header("Jagged shake settings")]
+    public float jaggedShakeFade;
 
     private Vector2 position; // Center position of camera
     private Vector2 offset; // Offset from center position
@@ -21,36 +22,42 @@ public class CameraController : MonoBehaviour
     private Vector2 shoveOffset = new Vector2();
     private Vector2 shoveVelocity = new Vector2();
 
-    private float rockPower = 0f;
-
-    private Vector2 shakeOffset = new Vector2();
     private float shakePower = 0f;
+
+    private Vector2 jaggedShakeOffset = new Vector2();
+    private float jaggedShakePower = 0f;
 
     public void Shove(Vector2 force) // Push the camera in a certain direction to create a "shove" effect
     {
         shoveVelocity += force;
     }
 
-    public void Rock(float force) // Rock the camera by randomly pushing it around
-    {
-        rockPower += force;
-    }
-
-    public void Shake(float force) // Shake the camera by randomly offsetting the position each frame
+    public void Shake(float force) // Shake the camera by randomly shoving it
     {
         shakePower += force;
+    }
+
+    public void JaggedShake(float force) // Shake the camera by randomly offsetting the position each frame
+    {
+        jaggedShakePower += force;
     }
 
     void Start()
     {
         position = new Vector2(transform.position.x, transform.position.y);
+        InvokeRepeating("ApplyShake", 0f, shakeInterval);
+    }
+
+    void ApplyShake()
+    {
+        Shove(Random.insideUnitCircle * shakePower);
     }
 
     void FixedUpdate()
     {
         UpdateShove();
-        UpdateRock();
         UpdateShake();
+        UpdateJaggedShake();
         UpdateOffset();
     }
 
@@ -66,20 +73,20 @@ public class CameraController : MonoBehaviour
         shoveOffset += shoveVelocity * shoveSpeed * Time.fixedDeltaTime;
     }
 
-    void UpdateRock()
-    {
-        rockPower -= rockPower * rockFade * Time.fixedDeltaTime;
-    }
-
     void UpdateShake()
     {
-        shakeOffset = Random.insideUnitCircle * shakePower;
         shakePower -= shakePower * shakeFade * Time.fixedDeltaTime;
+    }
+
+    void UpdateJaggedShake()
+    {
+        jaggedShakeOffset = Random.insideUnitCircle * jaggedShakePower;
+        jaggedShakePower -= jaggedShakePower * jaggedShakeFade * Time.fixedDeltaTime;
     }
 
     void UpdateOffset()
     {
-        offset = shoveOffset + shakeOffset;
+        offset = shoveOffset + jaggedShakeOffset;
         // Add offset to center position
         var newPosition = transform.position;
         newPosition.x = position.x + offset.x;

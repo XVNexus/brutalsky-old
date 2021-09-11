@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header("Object References")]
+    public GlobalData globalData;
     private new Rigidbody2D rigidbody;
     public Transform healthBar;
     public CameraController cameraController;
@@ -17,8 +18,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Attack Settings")]
     public float attackPower;
-    public float attackMinSpeed;
-    public float attackMaxSpeed;
+    public Vector2 attackMinMaxSpeed;
     public float attackCooldown;
     private float _attackCooldown = 0f;
 
@@ -26,6 +26,7 @@ public class PlayerController : MonoBehaviour
     private float _healthSmooth = 100f;
 
     private bool _abilityKeyInUse = false;
+    private Vector2 velocityLastFrame = new Vector2();
 
     void Start()
     {
@@ -37,7 +38,7 @@ public class PlayerController : MonoBehaviour
         UpdateCooldowns();
         UpdateUI();
         var speed = rigidbody.velocity.magnitude;
-        if (Input.GetAxis($"P{playerNum} Ability") > 0f && !_abilityKeyInUse && speed > attackMinSpeed && speed < attackMaxSpeed && _attackCooldown == 0f)
+        if (Input.GetAxis($"P{playerNum} Ability") > 0f && !_abilityKeyInUse && speed > attackMinMaxSpeed.x && speed < attackMinMaxSpeed.y && _attackCooldown == 0f)
         {
             rigidbody.AddForce(rigidbody.velocity.normalized * attackPower, ForceMode2D.Impulse);
             _attackCooldown = attackCooldown;
@@ -53,15 +54,33 @@ public class PlayerController : MonoBehaviour
     {
         var moveVector = new Vector2(Input.GetAxis($"P{playerNum} Horizontal"), Input.GetAxis($"P{playerNum} Vertical")).normalized;
         rigidbody.AddForce(moveVector * movePower);
+        globalData.playerVelocities[playerNum - 1] = velocityLastFrame;
+        velocityLastFrame = rigidbody.velocity;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        // Calculate impact force for use in camera shake effects and damage calculation
         var impact = collision.relativeVelocity * rigidbody.mass;
-        cameraController.Shove(impact.normalized * Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f));
-        var damage = Mathf.RoundToInt(impact.magnitude);
-        // _health -= damage;
-        Debug.Log(_health);
+
+        // Use the collision velocities to determine how much to shove the camera and how much to shake the camera
+        // If a player collides with a wall, the camera will be shoved, but if two players collide into each other going the same speed, the camera will be shook
+        var thisVelocity = globalData.playerVelocities[playerNum - 1];
+        var otherVelocity = new Vector2();
+        if (collision.collider.CompareTag("Player"))
+        {
+            otherVelocity = globalData.playerVelocities[2 - playerNum];
+        }
+        var combinedVelocity = thisVelocity + otherVelocity;
+        var highestSpeed = Mathf.Max(thisVelocity.magnitude, otherVelocity.magnitude);
+        var combinedSpeed = combinedVelocity.magnitude;
+        var shovePercent = Mathf.Clamp01(combinedSpeed / highestSpeed); // 1.0 = all shove, 0.0 = all shake, 0.5 = half shove half shake, etc.
+        var shakePercent = 1f - shovePercent;
+        cameraController.Shove(collision.contacts[0].normal * Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * shovePercent);
+        cameraController.Shake(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * shakePercent);
+
+        var damage = 0;
+        _health -= damage;
     }
 
     void UpdateUI()
