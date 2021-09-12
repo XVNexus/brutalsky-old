@@ -6,10 +6,13 @@ public class PlayerController : MonoBehaviour
     public GameManager gameManager;
     private new Rigidbody2D rigidbody;
     public Transform healthBar;
+    public SpriteRenderer healthRing;
+    public SpriteRenderer powerRing;
     public CameraController cameraController;
 
     [Header("Main Settings")]
     public int playerNum;
+    public int health = 100;
 
     [Header("Move Power")]
     public float movePower;
@@ -20,7 +23,6 @@ public class PlayerController : MonoBehaviour
     public float attackCooldown;
     private float attackCooldownTimer = 0f;
 
-    public int health = 100;
     private float healthSmoothed = 100f;
     // Used when adding/subtracting fractional values from health to store the non-integer part of the delta for later
     private float healthFractionalBuffer = 0f;
@@ -52,6 +54,14 @@ public class PlayerController : MonoBehaviour
             // If there is a fractional part of the health value that can't be applied to the integer health scale immediately,
             // save it to a buffer and apply it later when enough accumulates
             healthFractionalBuffer += deltaClamped - deltaInt;
+            if (deltaClamped > 0f)
+            {
+                healthRing.color = new Color(.2f, 1f, .2f, Mathf.Clamp(deltaClamped * .2f, .2f, 1f));
+            }
+            else if (deltaClamped < 0f)
+            {
+                healthRing.color = new Color(1f, .2f, .2f, Mathf.Clamp(-deltaClamped * .2f, .2f, 1f));
+            }
         }
         // If health runs out, trigger player death
         if (health == 0f)
@@ -120,11 +130,12 @@ public class PlayerController : MonoBehaviour
         cameraController.Shake(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * .5f * shakePercent);
 
         // Calculate damage based on impact and speed
-        Damage(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f), 1.5f) / Mathf.Max(velocityLastFrame.magnitude, 1f));
+        Damage(Mathf.Pow(Mathf.Max(impact.magnitude - 25f, 0f), 1.5f) / Mathf.Max(velocityLastFrame.magnitude, 2f));
     }
 
     private void UpdateUI()
     {
+        // Update health bar
         if (Mathf.Abs(health - healthSmoothed) < .1f)
         {
             healthSmoothed = health;
@@ -137,8 +148,31 @@ public class PlayerController : MonoBehaviour
         var localPosition = healthBar.localPosition;
         localScale.x = healthSmoothed / 100f;
         localPosition.x = -.5f + localScale.x / 2f;
+
+        // Update health ring
         healthBar.localScale = localScale;
         healthBar.localPosition = localPosition;
+        var ringColor = healthRing.color;
+        ringColor.a -= Time.deltaTime;
+        healthRing.color = ringColor;
+
+        // Update power ring
+        var speed = rigidbody.velocity.magnitude;
+        var attackPossible = speed > attackMinMaxSpeed.x && speed < attackMinMaxSpeed.y && attackCooldownTimer == 0f;
+        // This will be used soon but right now it's only a placeholder
+        var defendPossible = false;
+        if (attackPossible)
+        {
+            powerRing.color = new Color(.2f, 1f, 1f, .2f);
+        }
+        else if (defendPossible)
+        {
+            powerRing.color = new Color(1f, 1f, .2f, .2f);
+        }
+        else
+        {
+            powerRing.color = new Color(0f, 0f, 0f, 0f);
+        }
     }
 
     private void UpdateCooldowns()
