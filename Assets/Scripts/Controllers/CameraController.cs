@@ -80,13 +80,27 @@ public class CameraController : MonoBehaviour
 
     void UpdateShake()
     {
-        shakePower -= shakePower * shakeFade * Time.fixedDeltaTime;
+        if (shakePower >= .01f)
+        {
+            shakePower -= shakePower * shakeFade * Time.fixedDeltaTime;
+        }
+        else if (shakePower > 0f && shakePower < .01f)
+        {
+            shakePower = 0f;
+        }
     }
 
     void UpdateJaggedShake()
     {
         jaggedShakeOffset = Random.insideUnitCircle * jaggedShakePower;
-        jaggedShakePower -= jaggedShakePower * jaggedShakeFade * Time.fixedDeltaTime;
+        if (jaggedShakePower >= .01f)
+        {
+            jaggedShakePower -= jaggedShakePower * jaggedShakeFade * Time.fixedDeltaTime;
+        }
+        else if (jaggedShakePower > 0f && shakePower < .01f)
+        {
+            jaggedShakePower = 0f;
+        }
     }
 
     void UpdateOffset()

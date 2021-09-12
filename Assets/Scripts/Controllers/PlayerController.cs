@@ -1,10 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Object References")]
+    public GameManager gameManager;
     private new Rigidbody2D rigidbody;
     public Transform healthBar;
     public CameraController cameraController;
@@ -55,7 +54,17 @@ public class PlayerController : MonoBehaviour
             healthFractionalBuffer += deltaClamped - deltaInt;
         }
         // If health runs out, trigger player death
-        if (health == 0f) Destroy(gameObject);
+        if (health == 0f)
+        {
+            OnDie();
+        }
+    }
+
+    private void OnDie()
+    {
+        Destroy(gameObject);
+        cameraController.JaggedShake(2f);
+        gameManager.ReloadGame(3f);
     }
 
     void Start()
@@ -108,7 +117,7 @@ public class PlayerController : MonoBehaviour
         var shovePercent = Mathf.Clamp01(combinedSpeed / highestSpeed); // 1.0 = all shove, 0.0 = all shake, 0.5 = half shove half shake, etc.
         var shakePercent = 1f - shovePercent;
         cameraController.Shove(collision.contacts[0].normal * Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * shovePercent);
-        cameraController.Shake(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * shakePercent);
+        cameraController.Shake(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * .5f * shakePercent);
 
         // Calculate damage based on impact and speed
         Damage(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f), 1.5f) / Mathf.Max(velocityLastFrame.magnitude, 1f));
