@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public SpriteRenderer healthRing;
     public SpriteRenderer powerRing;
     public CameraController cameraController;
+    public ParticleSystem deathParticles;
 
     [Header("Main Settings")]
     public int playerNum;
@@ -54,13 +55,13 @@ public class PlayerController : MonoBehaviour
             // If there is a fractional part of the health value that can't be applied to the integer health scale immediately,
             // save it to a buffer and apply it later when enough accumulates
             healthFractionalBuffer += deltaClamped - deltaInt;
-            if (deltaClamped > 0f)
+            if (deltaInt > 0)
             {
-                healthRing.color = new Color(.2f, 1f, .2f, Mathf.Clamp(deltaClamped * .2f, .2f, 1f));
+                healthRing.color = new Color(.2f, 1f, .2f);
             }
-            else if (deltaClamped < 0f)
+            else if (deltaInt < 0)
             {
-                healthRing.color = new Color(1f, .2f, .2f, Mathf.Clamp(-deltaClamped * .2f, .2f, 1f));
+                healthRing.color = new Color(1f, .2f, .2f);
             }
         }
         // If health runs out, trigger player death
@@ -72,7 +73,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnDie()
     {
-        Destroy(gameObject);
+        deathParticles.Play();
         cameraController.JaggedShake(2f);
         gameManager.ReloadGame(3f);
     }
@@ -101,8 +102,11 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        // Update movement
         var moveVector = new Vector2(Input.GetAxis($"P{playerNum} Horizontal"), Input.GetAxis($"P{playerNum} Vertical")).normalized;
         rigidbody.AddForce(moveVector * movePower);
+
+        // Update stored velocity
         velocityLastFrame = velocityThisFrame;
         velocityThisFrame = rigidbody.velocity;
     }
@@ -161,18 +165,26 @@ public class PlayerController : MonoBehaviour
         var attackPossible = speed > attackMinMaxSpeed.x && speed < attackMinMaxSpeed.y && attackCooldownTimer == 0f;
         // This will be used soon but right now it's only a placeholder
         var defendPossible = false;
+        var targetColor = new Color();
         if (attackPossible)
         {
-            powerRing.color = new Color(.2f, 1f, 1f, .2f);
+            targetColor = new Color(.2f, 1f, 1f, .25f);
         }
         else if (defendPossible)
         {
-            powerRing.color = new Color(1f, 1f, .2f, .2f);
+            // Add color 
+            targetColor = new Color(1f, 1f, .2f, .25f);
         }
         else
         {
-            powerRing.color = new Color(0f, 0f, 0f, 0f);
+            targetColor = new Color(0f, 0f, 0f, 0f);
         }
+        var currentColor = powerRing.color;
+        currentColor.r += (targetColor.r - currentColor.r) * 10f * Time.deltaTime;
+        currentColor.g += (targetColor.g - currentColor.g) * 10f * Time.deltaTime;
+        currentColor.b += (targetColor.b - currentColor.b) * 10f * Time.deltaTime;
+        currentColor.a += (targetColor.a - currentColor.a) * 10f * Time.deltaTime;
+        powerRing.color = currentColor;
     }
 
     private void UpdateCooldowns()

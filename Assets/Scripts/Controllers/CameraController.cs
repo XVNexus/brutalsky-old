@@ -16,10 +16,7 @@ public class CameraController : MonoBehaviour
     [Header("Jagged shake settings")]
     public float jaggedShakeFade;
 
-    // Center position of camera
     private Vector2 position;
-    // Offset from center position
-    private Vector2 offset;
 
     private Vector2 shoveOffset = new Vector2();
     private Vector2 shoveVelocity = new Vector2();
@@ -33,18 +30,21 @@ public class CameraController : MonoBehaviour
     public void Shove(Vector2 force)
     {
         shoveVelocity += force;
+        Debug.Log($"shove {force}");
     }
 
     // Shake the camera by randomly shoving it
     public void Shake(float force)
     {
         shakePower += force;
+        Debug.Log($"shake {force}");
     }
 
     // Shake the camera by randomly offsetting the position each frame
     public void JaggedShake(float force)
     {
         jaggedShakePower += force;
+        Debug.Log($"jagged shake {force}");
     }
 
     void Start()
@@ -55,7 +55,10 @@ public class CameraController : MonoBehaviour
 
     void ApplyShake()
     {
-        Shove(Random.insideUnitCircle * shakePower);
+        if (shakePower > 0f)
+        {
+            Shove(Random.insideUnitCircle * shakePower);
+        }
     }
 
     void FixedUpdate()
@@ -105,7 +108,8 @@ public class CameraController : MonoBehaviour
 
     void UpdateOffset()
     {
-        offset = shoveOffset + jaggedShakeOffset;
+        var offset = shoveOffset + jaggedShakeOffset;
+        Debug.Log($"{shoveOffset}");
         // Add offset to center position
         var newPosition = transform.position;
         newPosition.x = position.x + offset.x;
