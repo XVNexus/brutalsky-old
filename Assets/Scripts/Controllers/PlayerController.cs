@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     public SpriteRenderer healthRing;
     public SpriteRenderer powerRing;
     public CameraController cameraController;
-    public ParticleSystem deathParticles;
+    public ParticleSystem[] deathEffects;
 
     [Header("Main Settings")]
     public int playerNum;
@@ -73,10 +73,13 @@ public class PlayerController : MonoBehaviour
 
     private void OnDie()
     {
-        deathParticles.transform.position = gameObject.transform.position;
+        foreach (var effect in deathEffects)
+        {
+            effect.transform.position = gameObject.transform.position;
+            effect.Play();
+        }
         Destroy(gameObject);
-        deathParticles.Play();
-        cameraController.JaggedShake(2f);
+        cameraController.Shake(5f);
         gameManager.ReloadGame(3f);
     }
 
