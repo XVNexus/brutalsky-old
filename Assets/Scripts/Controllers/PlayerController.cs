@@ -73,6 +73,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnDie()
     {
+        deathParticles.transform.position = gameObject.transform.position;
+        Destroy(gameObject);
         deathParticles.Play();
         cameraController.JaggedShake(2f);
         gameManager.ReloadGame(3f);
