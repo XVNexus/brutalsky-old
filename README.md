@@ -1,4 +1,3 @@
-
 # Brutalsky
 A physics-based fighting game with the objective of ramming / baiting / whatever else your opponent until they run out of health and go kaboom!
 
@@ -13,11 +12,14 @@ The chart below shows the conditions for each ability:
 |:-:|:-:|:-:|:-:|
 | Charge | 5-30 meters/second | 2 seconds | cyan |
 | Shield | ? | ? | yellow |
+
 *a translucent ring will appear around the player showing which ability is currently possible to perform, if any
 
 ### Damage System
 Damage dealt is based on how much impact you can deal to your opponent, so higher speed is always better when colliding with the other player.
+
 For maximum damage, charge at your opponent when they are moving slowly or can't charge against you at the moment (for example, if they are cornered or moving too slowly, they can't counter-charge when you charge them).
+
 When a player's health hits 0, they will explode (I'm so proud of my explosion effect lol) and the other player will win the round if they stay alive for another 3 seconds.
 
 ### Obstacles
@@ -30,18 +32,18 @@ When a player's health hits 0, they will explode (I'm so proud of my explosion e
 ## Controls
 
 ### Player 1
-**Move:** `🠙` `🠘` `🠛` `🠚`
-**Ability:** `'`
+- **Move:** `🠙` `🠘` `🠛` `🠚`
+- **Ability:** `'`
 
 ### Player 2
-**Move:** `E` `S` `D` `F`
-**Ability:** `~`
+- **Move:** `E` `S` `D` `F`
+- **Ability:** `~`
 
 ## Object Color Meaning
 
-**Orange:** player 1
-**Aqua:** player 2
-**Gray:** wall
-**Red:** damage obstacle
-**Green:** heal obstacle
-**Yellow:** instant death obstacle (only causes instant death if not full health)
+- **Orange:** player 1
+- **Aqua:** player 2
+- **Gray:** wall
+- **Red:** damage obstacle
+- **Green:** heal obstacle
+- **Yellow:** instant death obstacle (only causes instant death if not full health)
