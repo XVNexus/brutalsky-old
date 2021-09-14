@@ -30,35 +30,29 @@ public class CameraController : MonoBehaviour
     public void Shove(Vector2 force)
     {
         shoveVelocity += force;
-        Debug.Log($"shove {force}");
     }
 
     // Shake the camera by randomly shoving it
     public void Shake(float force)
     {
         shakePower += force;
-        Debug.Log($"shake {force}");
+        // This is used to dynamically cause shake effects
+        // If shakePower is currently 0, CancelInvoke is called to stop all attempts at updating camera shake when there is no need
+        if (!IsInvoking("ApplyShake"))
+        {
+            InvokeRepeating("ApplyShake", 0f, shakeInterval);
+        }
     }
 
     // Shake the camera by randomly offsetting the position each frame
     public void JaggedShake(float force)
     {
         jaggedShakePower += force;
-        Debug.Log($"jagged shake {force}");
     }
 
     void Start()
     {
         position = new Vector2(transform.position.x, transform.position.y);
-        InvokeRepeating("ApplyShake", 0f, shakeInterval);
-    }
-
-    void ApplyShake()
-    {
-        if (shakePower > 0f)
-        {
-            Shove(Random.insideUnitCircle * shakePower);
-        }
     }
 
     void FixedUpdate()
@@ -69,7 +63,7 @@ public class CameraController : MonoBehaviour
         UpdateOffset();
     }
 
-    void UpdateShove()
+    private void UpdateShove()
     {
         var targetVelocity = -shoveOffset;
         var targetAcceleration = targetVelocity - shoveVelocity;
@@ -81,19 +75,31 @@ public class CameraController : MonoBehaviour
         shoveOffset += shoveVelocity * shoveSpeed * Time.fixedDeltaTime;
     }
 
-    void UpdateShake()
+    private void UpdateShake()
     {
+        // If shakePower is above a certain threshold, keep reducing it
         if (shakePower >= .01f)
         {
             shakePower -= shakePower * shakeFade * Time.fixedDeltaTime;
         }
+        // Once shakepower falls below a certain threshold, snap it to 0 as it would be too small to notice at that scale anyway
         else if (shakePower > 0f && shakePower < .01f)
         {
             shakePower = 0f;
+            CancelInvoke("ApplyShake");
         }
     }
 
-    void UpdateJaggedShake()
+    // This method is used to randomly shove the camera to simulate shaking and is called every 0.1 seconds while shakePower > 0
+    private void ApplyShake()
+    {
+        if (shakePower > 0f)
+        {
+            Shove(Random.insideUnitCircle.normalized * shakePower);
+        }
+    }
+
+    private void UpdateJaggedShake()
     {
         jaggedShakeOffset = Random.insideUnitCircle * jaggedShakePower;
         if (jaggedShakePower >= .01f)
@@ -106,7 +112,7 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    void UpdateOffset()
+    private void UpdateOffset()
     {
         var offset = shoveOffset + jaggedShakeOffset;
         Debug.Log($"{shoveOffset}");

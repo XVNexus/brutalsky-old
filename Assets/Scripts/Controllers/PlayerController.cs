@@ -71,7 +71,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnDie()
+    public void OnDie()
     {
         foreach (var effect in deathEffects)
         {
@@ -79,7 +79,7 @@ public class PlayerController : MonoBehaviour
             effect.Play();
         }
         Destroy(gameObject);
-        cameraController.Shake(5f);
+        cameraController.Shake(2f);
         gameManager.ReloadGame(3f);
     }
 
@@ -136,7 +136,7 @@ public class PlayerController : MonoBehaviour
         var shovePercent = Mathf.Clamp01(combinedSpeed / highestSpeed); // 1.0 = all shove, 0.0 = all shake, 0.5 = half shove half shake, etc.
         var shakePercent = 1f - shovePercent;
         cameraController.Shove(collision.contacts[0].normal * Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * shovePercent);
-        cameraController.Shake(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * .5f * shakePercent);
+        cameraController.Shake(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * .1f * shakePercent);
 
         // Calculate damage based on impact and speed
         Damage(Mathf.Pow(Mathf.Max(impact.magnitude - 25f, 0f), 1.5f) / Mathf.Max(velocityLastFrame.magnitude, 2f));
