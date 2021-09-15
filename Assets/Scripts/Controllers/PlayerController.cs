@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public SpriteRenderer healthRing;
     public SpriteRenderer powerRing;
     public CameraController cameraController;
+    public ParticleSystem trailEffect;
     public ParticleSystem[] deathEffects;
 
     [Header("Main Settings")]
@@ -93,15 +94,15 @@ public class PlayerController : MonoBehaviour
         UpdateCooldowns();
         UpdateUI();
         var speed = rigidbody.velocity.magnitude;
-        if (Input.GetAxis($"P{playerNum} Ability") > 0f && !abilityKeyInUse && speed > attackMinMaxSpeed.x && speed < attackMinMaxSpeed.y && attackCooldownTimer == 0f)
+        if (Input.GetAxis($"P{playerNum} Ability") > 0f && speed > attackMinMaxSpeed.x && speed < attackMinMaxSpeed.y && attackCooldownTimer == 0f)
         {
             rigidbody.AddForce(rigidbody.velocity.normalized * attackPower, ForceMode2D.Impulse);
             attackCooldownTimer = attackCooldown;
-            abilityKeyInUse = true;
-        }
-        if (Input.GetAxis($"P{playerNum} Ability") == 0f)
-        {
-            abilityKeyInUse = false;
+            // Play charge trail effect if it's not already playing
+            if (trailEffect.isStopped)
+            {
+                trailEffect.Play();
+            }
         }
     }
 
@@ -140,6 +141,12 @@ public class PlayerController : MonoBehaviour
 
         // Calculate damage based on impact and speed
         Damage(Mathf.Pow(Mathf.Max(impact.magnitude - 25f, 0f), 1.5f) / Mathf.Max(velocityLastFrame.magnitude, 2f));
+
+        // Stop charge trail effect if it's playing
+        if (trailEffect.isPlaying)
+        {
+            trailEffect.Stop();
+        }
     }
 
     private void UpdateUI()
