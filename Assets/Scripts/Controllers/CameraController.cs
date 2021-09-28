@@ -16,6 +16,9 @@ public class CameraController : MonoBehaviour
     [Header("Jagged shake settings")]
     public float jaggedShakeFade;
 
+    [Header("Other settings")]
+    public Vector2 arenaSize;
+
     private Vector2 position;
 
     private Vector2 shoveOffset = new Vector2();
@@ -25,6 +28,8 @@ public class CameraController : MonoBehaviour
 
     private Vector2 jaggedShakeOffset = new Vector2();
     private float jaggedShakePower = 0f;
+
+    private Vector2 cameraSize;
 
     // Push the camera in a certain direction to create a "shove" effect
     public void Shove(Vector2 force)
@@ -53,6 +58,11 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         position = new Vector2(transform.position.x, transform.position.y);
+    }
+
+    void Update()
+    {
+        UpdateCameraSize();
     }
 
     void FixedUpdate()
@@ -114,13 +124,30 @@ public class CameraController : MonoBehaviour
 
     private void UpdateOffset()
     {
+        // TODO: fix (NaN, NaN) shoveOffset when the scene starts with the players in contact with the ground
         var offset = shoveOffset + jaggedShakeOffset;
-        Debug.Log($"{shoveOffset}");
         // Add offset to center position
         var newPosition = transform.position;
         newPosition.x = position.x + offset.x;
         newPosition.y = position.y + offset.y;
         // Apply position + offset to camera transform
         transform.position = newPosition;
+    }
+
+    private void UpdateCameraSize()
+    {
+        var cam = Camera.main;
+        cameraSize.y = 2f * cam.orthographicSize;
+        cameraSize.x = cameraSize.y * cam.aspect;
+        var arenaCameraFillPercent = arenaSize / cameraSize;
+        var smallestAxisIsY = arenaCameraFillPercent.y >= arenaCameraFillPercent.x; // true = y axis, false = x axis
+        if (smallestAxisIsY)
+        {
+            cam.orthographicSize = arenaSize.y / 2f;
+        }
+        else
+        {
+            cam.orthographicSize = arenaSize.x / 2f / cam.aspect;
+        }
     }
 }

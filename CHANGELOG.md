@@ -42,6 +42,8 @@
 ### Added
 - Indicator ring on players that shows when health changes and when charging is possible
 - Game automatically resets when one or both players die
+### Fixed
+- Players took a small amount of damage when they collided with something while moving slowly
 
 ## V 0.7 &nbsp; `2021-09-12 21:54`
 ### Added
@@ -93,3 +95,13 @@
 - Heal obstalces (green health change obstacles) have twice as much buoyancy force so it's more difficult to remain in the same spot while healing (you may notice I don't like campers)
 ### Fixed
 - It's no longer possible to escape the arena by going into the health change obstacles and through the sides of them (added walls to block the open gaps on the sides)
+
+## V 0.12 &nbsp; `2021-09-28 13:39`
+### Added
+- The ability key can be held while using the charge ability to add extra power to the charge (you will see some particles as an indicator of charge power, more particles = more power)
+- Arena is always in view of the camera, even if the horizontal size of the camera gets smaller than the arena width (before this update, the sides of the arena would just go out of view of the camera if the horizontal camera size was too small)
+- Health change obstacles have bubble effects to go with the liquid physics
+- Instant death obstacles have a "saw blade" effect
+- *[TECHNICAL] Recreated the ability system so it's a lot more configurable*
+### Changed
+- The space outside of the arena shows as black instead of being able to see stuff out of bounds

@@ -1,36 +1,264 @@
 using UnityEngine;
 
+public enum AbilityState
+{
+    IDLE,       // Stage 1: ability is not charging or active and is ready to be used
+    CHARGING,   // Stage 2: ability is currently being charged by holding the ability key
+    ACTIVE,     // Stage 3: ability has been charged and has been activated
+    COOLDOWN    // Stage 4: ability has been spent and is inusable until it has finished the cooldown time
+}
+
+[System.Serializable]
+public struct AbilitySettings
+{
+    public float chargeTime;
+    public float activeTime;
+    public float cooldownTime;
+    public Vector2 minMaxSpeed;
+    public Color color;
+
+    public AbilitySettings(float chargeTime, float activeTime, float cooldownTime, Vector2 minMaxSpeed, Color color)
+    {
+        this.chargeTime = chargeTime;
+        this.activeTime = activeTime;
+        this.cooldownTime = cooldownTime;
+        this.minMaxSpeed = minMaxSpeed;
+        this.color = color;
+    }
+}
+
+public abstract class Ability
+{
+    public AbilitySettings settings;
+    public AbilityState state { get; private set; } = AbilityState.IDLE;
+    public float chargeTimer { get; private set; } = 0f;
+    public float activeTimer { get; private set; } = 0f;
+    public float cooldownTimer { get; private set; } = 0f;
+    public float ChargeCompletePercent { get => chargeTimer / settings.chargeTime; }
+    public float ActiveCompletePercent { get => (settings.activeTime - activeTimer) / settings.activeTime; }
+    public float CooldownCompletePercent { get => (settings.cooldownTime - cooldownTimer) / settings.cooldownTime; }
+
+    public Ability(AbilitySettings settings)
+    {
+        this.settings = settings;
+    }
+
+    /// <summary>
+    /// Start charging ability.
+    /// </summary>
+    /// <param name="player"></param>
+    public void Initiate(PlayerController player)
+    {
+        if (state == AbilityState.IDLE)
+        {
+            state = AbilityState.CHARGING;
+            OnInitiate(player);
+        }
+    }
+
+    /// <summary>
+    /// Stop charging and activate abililty.
+    /// </summary>
+    /// <param name="player"></param>
+    public void Activate(PlayerController player)
+    {
+        if (state == AbilityState.CHARGING)
+        {
+            state = AbilityState.ACTIVE;
+            activeTimer = settings.activeTime;
+            OnActivate(player, ChargeCompletePercent);
+            chargeTimer = 0f;
+        }
+    }
+
+    /// <summary>
+    /// Deactivate ability manually even if the active timer hasn't finished yet
+    /// </summary>
+    /// <param name="player"></param>
+    public void Deactivate(PlayerController player)
+    {
+        if (state == AbilityState.ACTIVE)
+        {
+            state = AbilityState.COOLDOWN;
+            cooldownTimer = settings.cooldownTime;
+            OnDeactivate(player, ActiveCompletePercent);
+            activeTimer = 0f;
+        }
+    }
+
+    public bool IsActivatable(float speed)
+    {
+        return state == AbilityState.IDLE && speed >= settings.minMaxSpeed.x && speed <= settings.minMaxSpeed.y;
+    }
+
+    /// <summary>
+    /// Called once when ability starts charging.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnInitiate(PlayerController player) { }
+
+    /// <summary>
+    /// Called every frame while ability is charging.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnCharging(PlayerController player, float chargeCompletePercent) { }
+
+    /// <summary>
+    /// Called once when ability activates.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnActivate(PlayerController player, float chargePercent) { }
+
+    /// <summary>
+    /// Called every frame while ability is active.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnActive(PlayerController player, float activeCompletePercent) { }
+
+    /// <summary>
+    /// Called once when ability deactivates.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnDeactivate(PlayerController player, float activePercent) { }
+
+    /// <summary>
+    /// Called every frame while ability cools down.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnCooldown(PlayerController player, float cooldownCompletePercent) { }
+
+    /// <summary>
+    /// Called once when ability finishes cooldown and becomes idle.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnReady(PlayerController player) { }
+
+    /// <summary>
+    /// Call this function from Update() or FixedUpdate() to keep timers updated
+    /// </summary>
+    /// <param name="deltaTime"></param>
+    /// <param name="player"></param>
+    public virtual void UpdateTimers(float deltaTime, PlayerController player)
+    {
+        switch (state)
+        {
+            case AbilityState.IDLE:
+                break;
+            case AbilityState.CHARGING:
+                if (chargeTimer < settings.chargeTime)
+                {
+                    chargeTimer = Mathf.Min(chargeTimer + deltaTime, settings.chargeTime);
+                    OnCharging(player, ChargeCompletePercent);
+                }
+                else
+                {
+                    OnCharging(player, 1f);
+                }
+                break;
+            case AbilityState.ACTIVE:
+                if (activeTimer > 0f)
+                {
+                    activeTimer = Mathf.Max(activeTimer - deltaTime, 0f);
+                    OnActive(player, ActiveCompletePercent);
+                }
+                else
+                {
+                    Deactivate(player);
+                }
+                break;
+            case AbilityState.COOLDOWN:
+                if (cooldownTimer > 0f)
+                {
+                    cooldownTimer = Mathf.Max(chargeTimer - deltaTime, 0f);
+                    OnCooldown(player, CooldownCompletePercent);
+                }
+                else
+                {
+                    state = AbilityState.IDLE;
+                    OnReady(player);
+                }
+                break;
+        }
+    }
+}
+
+public class AbilityAttack : Ability
+{
+    public Vector2 powerMinMax;
+
+    public AbilityAttack(AbilitySettings settings) : base(settings) { }
+
+    public override void OnInitiate(PlayerController player)
+    {
+        player.chargeUpEffect.Play();
+    }
+
+    public override void OnCharging(PlayerController player, float chargeCompletePercent)
+    {
+        var emissionModule = player.chargeUpEffect.emission;
+        emissionModule.rateOverTime = 50f * ChargeCompletePercent;
+    }
+
+    public override void OnActivate(PlayerController player, float chargeCompletePercent)
+    {
+        var power = Mathf.Lerp(powerMinMax.x, powerMinMax.y, chargeCompletePercent);
+        player.rigidbody.AddForce(player.rigidbody.velocity.normalized * power, ForceMode2D.Impulse);
+        player.chargeUpEffect.Stop();
+        player.trailEffect.Play();
+    }
+
+    public override void OnDeactivate(PlayerController player, float activeCompletePercent)
+    {
+        player.trailEffect.Stop();
+    }
+}
+
+public class AbilityDefend : Ability
+{
+    public AbilityDefend(AbilitySettings settings) : base(settings) { }
+
+    public override void OnActivate(PlayerController player, float chargeCompletePercent)
+    {
+        //TODO: ADD FUNCTIONALITY FOR DEFEND ABILITY
+    }
+}
+
 public class PlayerController : MonoBehaviour
 {
     [Header("Object References")]
     public GameManager gameManager;
-    private new Rigidbody2D rigidbody;
+    public new Rigidbody2D rigidbody;
     public Transform healthBar;
     public SpriteRenderer healthRing;
     public SpriteRenderer powerRing;
     public CameraController cameraController;
+    public ParticleSystem chargeUpEffect;
     public ParticleSystem trailEffect;
     public ParticleSystem[] deathEffects;
 
     [Header("Main Settings")]
     public int playerNum;
     public int health = 100;
-
-    [Header("Move Power")]
     public float movePower;
 
-    [Header("Attack Settings")]
-    public float attackPower;
-    public Vector2 attackMinMaxSpeed;
-    public float attackCooldown;
-    private float attackCooldownTimer = 0f;
+    [Header("Ability Settings")]
+    public AbilitySettings abilityAttackSettings;
+    public Vector2 abilityAttackPowerMinMax;
+    public AbilitySettings abilityDefendSettings;
+
+    private AbilityAttack abilityAttack;
+    private AbilityDefend abilityDefend;
+    private Ability[] abilities;
+    private Ability activeAbility;
 
     private float healthSmoothed = 100f;
     // Used when adding/subtracting fractional values from health to store the non-integer part of the delta for later
     private float healthFractionalBuffer = 0f;
+    private bool abilityKeyDown = false;
 
-    private bool abilityKeyInUse = false;
+    [HideInInspector]
     public Vector2 velocityThisFrame = new Vector2();
+    [HideInInspector]
     public Vector2 velocityLastFrame = new Vector2();
 
     public void Heal(float amount)
@@ -80,21 +308,44 @@ public class PlayerController : MonoBehaviour
             effect.Play();
         }
         Destroy(gameObject);
-        cameraController.Shake(2f);
+        cameraController.Shake(3f);
         gameManager.ReloadGame(3f);
     }
 
     void Start()
     {
         rigidbody = GetComponent<Rigidbody2D>();
+        abilityAttack = new AbilityAttack(abilityAttackSettings);
+        abilityAttack.powerMinMax = abilityAttackPowerMinMax;
+        abilityDefend = new AbilityDefend(abilityDefendSettings);
+        abilities = new Ability[] { abilityAttack };
     }
 
     void Update()
     {
-        UpdateCooldowns();
         UpdateUI();
-        var speed = rigidbody.velocity.magnitude;
-        if (Input.GetAxis($"P{playerNum} Ability") > 0f && speed > attackMinMaxSpeed.x && speed < attackMinMaxSpeed.y && attackCooldownTimer == 0f)
+        if (Input.GetAxis($"P{playerNum} Ability") > 0f && !abilityKeyDown)
+        {
+            for (var i = 0; i < abilities.Length && activeAbility == null; i++)
+            {
+                var ability = abilities[i];
+                if (ability.IsActivatable(rigidbody.velocity.magnitude))
+                {
+                    ability.Initiate(this);
+                    activeAbility = ability;
+                }
+            }
+            abilityKeyDown = true;
+        }
+        else if (Input.GetAxis($"P{playerNum} Ability") == 0f && abilityKeyDown)
+        {
+            if (activeAbility != null)
+            {
+                activeAbility.Activate(this);
+            }
+            abilityKeyDown = false;
+        }
+        /*if (Input.GetAxis($"P{playerNum} Ability") > 0f && speed > attackMinMaxSpeed.x && speed < attackMinMaxSpeed.y && attackCooldownTimer == 0f)
         {
             rigidbody.AddForce(rigidbody.velocity.normalized * attackPower, ForceMode2D.Impulse);
             attackCooldownTimer = attackCooldown;
@@ -103,11 +354,13 @@ public class PlayerController : MonoBehaviour
             {
                 trailEffect.Play();
             }
-        }
+        }*/
     }
 
     void FixedUpdate()
     {
+        UpdateCooldowns();
+
         // Update movement
         var moveVector = new Vector2(Input.GetAxis($"P{playerNum} Horizontal"), Input.GetAxis($"P{playerNum} Vertical")).normalized;
         rigidbody.AddForce(moveVector * movePower);
@@ -142,10 +395,10 @@ public class PlayerController : MonoBehaviour
         // Calculate damage based on impact and speed
         Damage(Mathf.Pow(Mathf.Max(impact.magnitude - 25f, 0f), 1.5f) / Mathf.Max(velocityLastFrame.magnitude, 2f));
 
-        // Stop charge trail effect if it's playing
-        if (trailEffect.isPlaying)
+        // Stop charge ability if it's active
+        if (activeAbility.state == AbilityState.ACTIVE)
         {
-            trailEffect.Stop();
+            activeAbility.Deactivate(this);
         }
     }
 
@@ -173,23 +426,13 @@ public class PlayerController : MonoBehaviour
         healthRing.color = ringColor;
 
         // Update power ring
-        var speed = rigidbody.velocity.magnitude;
-        var attackPossible = speed > attackMinMaxSpeed.x && speed < attackMinMaxSpeed.y && attackCooldownTimer == 0f;
-        // This will be used soon but right now it's only a placeholder
-        var defendPossible = false;
-        var targetColor = new Color();
-        if (attackPossible)
+        var targetColor = new Color(0f, 0f, 0f, 0f);
+        foreach (var ability in abilities)
         {
-            targetColor = new Color(.2f, 1f, 1f, .25f);
-        }
-        else if (defendPossible)
-        {
-            // Add color 
-            targetColor = new Color(1f, 1f, .2f, .25f);
-        }
-        else
-        {
-            targetColor = new Color(0f, 0f, 0f, 0f);
+            if (ability.IsActivatable(rigidbody.velocity.magnitude) && activeAbility == null)
+            {
+                targetColor = ability.settings.color;
+            }
         }
         var currentColor = powerRing.color;
         currentColor.r += (targetColor.r - currentColor.r) * 10f * Time.deltaTime;
@@ -201,9 +444,16 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateCooldowns()
     {
-        if (attackCooldownTimer > 0f)
+        foreach (var ability in abilities)
         {
-            attackCooldownTimer = Mathf.Max(attackCooldownTimer - Time.deltaTime, 0f);
+            ability.UpdateTimers(Time.fixedDeltaTime, this);
+        }
+        if (activeAbility != null)
+        {
+            if (activeAbility.state == AbilityState.COOLDOWN)
+            {
+                activeAbility = null;
+            }
         }
     }
 }
