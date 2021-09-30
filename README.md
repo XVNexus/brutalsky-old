@@ -6,12 +6,12 @@ A physics-based fighting game with the objective of ramming / baiting / whatever
 ### - At the moment, this game is meant to be played with two people using the same keyboard, but I plan to add multiplayer in the future.
 
 ### Ability Key
-This key is used for charging and shielding, depending on your speed and ability cooldown.
-The chart below shows the conditions for each ability:
-| Ability | Required speed | Cooldown after usage | Ring color* |
-|:-:|:-:|:-:|:-:|
-| Charge | 5-30 meters/second | 2 seconds | cyan |
-| Shield | ? | ? | yellow |
+This key is used for charging and shielding, depending on your speed and ability cooldown. For charging, this key can be held down to increase the power of the charge (no more power increase after 3 seconds of holding).
+The chart below shows the properties of each ability:
+| Ability | Required speed | Charge time for full power | Cooldown after usage | Ring color* |
+|:-:|:-:|:-:|:-:|:-:|
+| Charge | 5-30 meters/second | 3 seconds | 2 seconds | cyan |
+| Shield | ? | ? | ? | yellow |
 
 *a translucent ring will appear around the player showing which ability is currently possible to perform, if any
 
@@ -36,7 +36,7 @@ When a player's health hits 0, they will explode (I'm so proud of my explosion e
 - **Ability:** `'`
 
 ### Player 2
-- **Move:** `E` `S` `D` `F`
+- **Move:** `W` `A` `S` `D`
 - **Ability:** `~`
 
 ## Object Color Meaning

@@ -37,6 +37,7 @@ public abstract class Ability
     public float ChargeCompletePercent { get => chargeTimer / settings.chargeTime; }
     public float ActiveCompletePercent { get => (settings.activeTime - activeTimer) / settings.activeTime; }
     public float CooldownCompletePercent { get => (settings.cooldownTime - cooldownTimer) / settings.cooldownTime; }
+    private bool activationQueued = false;
 
     public Ability(AbilitySettings settings)
     {
@@ -62,12 +63,17 @@ public abstract class Ability
     /// <param name="player"></param>
     public void Activate(PlayerController player)
     {
-        if (state == AbilityState.CHARGING)
+        var isPlayerSpeedInRange = IsSpeedInRange(player.rigidbody.velocity.magnitude);
+        if (state == AbilityState.CHARGING && isPlayerSpeedInRange)
         {
             state = AbilityState.ACTIVE;
             activeTimer = settings.activeTime;
             OnActivate(player, ChargeCompletePercent);
             chargeTimer = 0f;
+        }
+        else if (!isPlayerSpeedInRange)
+        {
+            activationQueued = true;
         }
     }
 
@@ -88,7 +94,12 @@ public abstract class Ability
 
     public bool IsActivatable(float speed)
     {
-        return state == AbilityState.IDLE && speed >= settings.minMaxSpeed.x && speed <= settings.minMaxSpeed.y;
+        return state == AbilityState.IDLE && IsSpeedInRange(speed);
+    }
+
+    public bool IsSpeedInRange(float speed)
+    {
+        return speed >= settings.minMaxSpeed.x && speed <= settings.minMaxSpeed.y;
     }
 
     /// <summary>
@@ -145,6 +156,11 @@ public abstract class Ability
             case AbilityState.IDLE:
                 break;
             case AbilityState.CHARGING:
+                if (activationQueued && IsSpeedInRange(player.rigidbody.velocity.magnitude))
+                {
+                    Activate(player);
+                    activationQueued = false;
+                }
                 if (chargeTimer < settings.chargeTime)
                 {
                     chargeTimer = Mathf.Min(chargeTimer + deltaTime, settings.chargeTime);
@@ -205,6 +221,7 @@ public class AbilityAttack : Ability
         player.rigidbody.AddForce(player.rigidbody.velocity.normalized * power, ForceMode2D.Impulse);
         player.chargeUpEffect.Stop();
         player.trailEffect.Play();
+        player.ghostEffect.Play();
     }
 
     public override void OnDeactivate(PlayerController player, float activeCompletePercent)
@@ -234,6 +251,7 @@ public class PlayerController : MonoBehaviour
     public CameraController cameraController;
     public ParticleSystem chargeUpEffect;
     public ParticleSystem trailEffect;
+    public ParticleSystem ghostEffect;
     public ParticleSystem[] deathEffects;
 
     [Header("Main Settings")]
@@ -281,6 +299,10 @@ public class PlayerController : MonoBehaviour
             // Get the integer component of the health delta that can be immediately applied to health value
             var deltaInt = (int)deltaClamped;
             health += deltaInt;
+            if (deltaInt < 0)
+            {
+                cameraController.Shake(5f * -deltaInt / 100f);
+            }
             // If there is a fractional part of the health value that can't be applied to the integer health scale immediately,
             // save it to a buffer and apply it later when enough accumulates
             healthFractionalBuffer += deltaClamped - deltaInt;
@@ -307,9 +329,9 @@ public class PlayerController : MonoBehaviour
             effect.transform.position = gameObject.transform.position;
             effect.Play();
         }
+        cameraController.Shake(5f);
+        gameManager.EndGame();
         Destroy(gameObject);
-        cameraController.Shake(3f);
-        gameManager.ReloadGame(3f);
     }
 
     void Start()
@@ -390,15 +412,18 @@ public class PlayerController : MonoBehaviour
         var shovePercent = Mathf.Clamp01(combinedSpeed / highestSpeed); // 1.0 = all shove, 0.0 = all shake, 0.5 = half shove half shake, etc.
         var shakePercent = 1f - shovePercent;
         cameraController.Shove(collision.contacts[0].normal * Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * shovePercent);
-        cameraController.Shake(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * .1f * shakePercent);
+        cameraController.Shake(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * .2f * shakePercent);
 
         // Calculate damage based on impact and speed
         Damage(Mathf.Pow(Mathf.Max(impact.magnitude - 25f, 0f), 1.5f) / Mathf.Max(velocityLastFrame.magnitude, 2f));
 
         // Stop charge ability if it's active
-        if (activeAbility.state == AbilityState.ACTIVE)
+        if (activeAbility is AbilityAttack)
         {
-            activeAbility.Deactivate(this);
+            if (activeAbility.state == AbilityState.ACTIVE)
+            {
+                activeAbility.Deactivate(this);
+            }
         }
     }
 

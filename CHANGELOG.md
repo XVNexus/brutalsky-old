@@ -105,3 +105,14 @@
 - *[TECHNICAL] Recreated the ability system so it's a lot more configurable*
 ### Changed
 - The space outside of the arena shows as black instead of being able to see stuff out of bounds
+
+## V 0.13 &nbsp; `2021-09-30 15:07`
+### Added
+- Main menu (open by pressing escape)
+- When the game ends, a text appears telling which player won
+- Time slows down when the game ends
+### Changed
+- It is impossible to charge unless you are moving (previously, you could start pressing the ability key while moving fast enough to build up a charge and then use it even when you are sitting still, but now charging can only be done while moving and will be delayed until the player is moving fast enough if they stop pressing the ability key while not moving)
+- Charging now leaves behind a "ghost image" of the player for 1 second
+### Fixed
+- Updated `README.md` to include info about ability charge up
