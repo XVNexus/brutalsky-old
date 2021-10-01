@@ -106,7 +106,7 @@
 ### Changed
 - The space outside of the arena shows as black instead of being able to see stuff out of bounds
 
-## V 0.13 &nbsp; `2021-09-30 15:07`
+## V 0.13 // UI Update &nbsp; `2021-09-30 15:07`
 ### Added
 - Main menu (open by pressing escape)
 - When the game ends, a text appears telling which player won
@@ -116,3 +116,16 @@
 - Charging now leaves behind a "ghost image" of the player for 1 second
 ### Fixed
 - Updated `README.md` to include info about ability charge up
+
+## V 0.14 // Cheats Update &nbsp; `2021-10-01 15:24`
+### Added
+- A cheat menu accessible by pressing `/` that can heal or kill players (more options planned to be added)
+### Changed
+- Heal obstacles now have the same buoyancy force as the damage obstacles
+- Removed saw blade effect from instant death obstacles
+- The outside of the arena appears gray like the walls instead of black
+- *[TECHNICAL] Recreated the UI system so it's more flexible and a lot of the functionality is done automatically*
+### Fixed
+- Fixed the camera breaking with (NaN, NaN) position if the level starts with the players touching the arena (finally) (this is the same bug mentioned in v0.7)
+- Fixed ability cooldown not working
+- Added title to previous update entry

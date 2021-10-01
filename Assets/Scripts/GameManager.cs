@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,20 +15,23 @@ public class GameManager : MonoBehaviour
 
     public void EndGame()
     {
-        var winningPlayerNum = 0;
-        var winningPlayerColor = new Color();
-        for (var i = 0; i < players.Length && winningPlayerNum == 0; i++)
+        if (!gameOver)
         {
-            var player = players[i];
-            if (player.health > 0)
+            var winningPlayerNum = 0;
+            var winningPlayerColor = new Color();
+            for (var i = 0; i < players.Length && winningPlayerNum == 0; i++)
             {
-                winningPlayerNum = player.playerNum;
-                winningPlayerColor = player.GetComponent<SpriteRenderer>().color;
+                var player = players[i];
+                if (player.health > 0)
+                {
+                    winningPlayerNum = player.playerNum;
+                    winningPlayerColor = player.GetComponent<SpriteRenderer>().color;
+                }
             }
+            uiController.ShowWinText(winningPlayerNum, winningPlayerColor);
+            Time.timeScale = 0.2f;
+            gameOver = true;
         }
-        uiController.ShowWinText(winningPlayerNum, winningPlayerColor);
-        Time.timeScale = 0.2f;
-        gameOver = true;
     }
 
     public void ReloadGame()
@@ -43,6 +44,20 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = value;
         Time.fixedDeltaTime = 0.02f * value;
+    }
+
+    public void ChangePlayerHealth(int playerNum, int delta)
+    {
+        var playerFound = false;
+        for (var i = 0; i < players.Length && !playerFound; i++)
+        {
+            var player = players[i];
+            if (player.playerNum == playerNum)
+            {
+                player.ChangeHealth(delta);
+                playerFound = true;
+            }
+        }
     }
 
     void Start()

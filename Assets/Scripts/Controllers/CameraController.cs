@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -124,7 +122,6 @@ public class CameraController : MonoBehaviour
 
     private void UpdateOffset()
     {
-        // TODO: fix (NaN, NaN) shoveOffset when the scene starts with the players in contact with the ground
         var offset = shoveOffset + jaggedShakeOffset;
         // Add offset to center position
         var newPosition = transform.position;

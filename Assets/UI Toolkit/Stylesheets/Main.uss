@@ -1,3 +1,20 @@
+.label {
+    color: rgb(255, 255, 255);
+    width: 280px;
+    -unity-text-align: middle-center;
+    height: 30px;
+    white-space: normal;
+    font-size: 20px;
+}
+
+.label-settings-header {
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+    font-size: 20px;
+    -unity-text-align: middle-center;
+    height: 30px;
+}
+
 .button {
     background-color: rgb(51, 51, 51);
     border-left-width: 0;
@@ -15,31 +32,10 @@
 
 .button:hover {
     background-color: rgb(64, 64, 64);
-    border-left-width: 0;
-    border-right-width: 0;
-    border-top-width: 0;
-    border-bottom-width: 0;
-    margin-left: 5px;
-    margin-right: 5px;
-    color: rgb(255, 255, 255);
-    width: 280px;
-    height: 40px;
-    white-space: normal;
-    font-size: 20px;
 }
 
 .button:active {
     background-color: rgb(38, 38, 38);
-    border-left-width: 0;
-    border-right-width: 0;
-    border-top-width: 0;
-    border-bottom-width: 0;
-    margin-left: 5px;
-    margin-right: 5px;
-    color: rgb(255, 255, 255);
-    width: 280px;
-    height: 40px;
-    white-space: normal;
     font-size: 18px;
 }
 
@@ -77,4 +73,50 @@
     border-bottom-right-radius: 5px;
     margin-top: 5px;
     margin-bottom: 5px;
+}
+
+.text-field > Label, .toggle > Label {
+    color: rgb(255, 255, 255);
+    font-size: 16px;
+}
+
+.text-field > #unity-text-input {
+    background-color: rgb(51, 51, 51);
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-top-width: 0;
+    color: rgb(255, 255, 255);
+}
+
+.text-field > #unity-text-input:hover {
+    background-color: rgb(64, 64, 64);
+}
+
+#unity-text-input:focus {
+    background-color: rgb(64, 64, 64);
+}
+
+.text-field:focus > Label, .toggle:focus > Label {
+    color: rgb(255, 170, 0);
+}
+
+.toggle > VisualElement > #unity-checkmark {
+    background-color: rgb(51, 51, 51);
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-top-width: 0;
+}
+
+.toggle > VisualElement:hover > #unity-checkmark {
+    background-color: rgb(64, 64, 64);
 }

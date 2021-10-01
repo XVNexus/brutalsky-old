@@ -185,8 +185,9 @@ public abstract class Ability
             case AbilityState.COOLDOWN:
                 if (cooldownTimer > 0f)
                 {
-                    cooldownTimer = Mathf.Max(chargeTimer - deltaTime, 0f);
+                    cooldownTimer = Mathf.Max(cooldownTimer - deltaTime, 0f);
                     OnCooldown(player, CooldownCompletePercent);
+
                 }
                 else
                 {
@@ -279,6 +280,15 @@ public class PlayerController : MonoBehaviour
     [HideInInspector]
     public Vector2 velocityLastFrame = new Vector2();
 
+    void Start()
+    {
+        rigidbody = GetComponent<Rigidbody2D>();
+        abilityAttack = new AbilityAttack(abilityAttackSettings);
+        abilityAttack.powerMinMax = abilityAttackPowerMinMax;
+        abilityDefend = new AbilityDefend(abilityDefendSettings);
+        abilities = new Ability[] { abilityAttack };
+    }
+
     public void Heal(float amount)
     {
         ChangeHealth(amount);
@@ -308,11 +318,11 @@ public class PlayerController : MonoBehaviour
             healthFractionalBuffer += deltaClamped - deltaInt;
             if (deltaInt > 0)
             {
-                healthRing.color = new Color(.2f, 1f, .2f);
+                healthRing.color = new Color(.2f, 1f, .2f, .75f);
             }
             else if (deltaInt < 0)
             {
-                healthRing.color = new Color(1f, .2f, .2f);
+                healthRing.color = new Color(1f, .2f, .2f, .75f);
             }
         }
         // If health runs out, trigger player death
@@ -332,15 +342,6 @@ public class PlayerController : MonoBehaviour
         cameraController.Shake(5f);
         gameManager.EndGame();
         Destroy(gameObject);
-    }
-
-    void Start()
-    {
-        rigidbody = GetComponent<Rigidbody2D>();
-        abilityAttack = new AbilityAttack(abilityAttackSettings);
-        abilityAttack.powerMinMax = abilityAttackPowerMinMax;
-        abilityDefend = new AbilityDefend(abilityDefendSettings);
-        abilities = new Ability[] { abilityAttack };
     }
 
     void Update()
@@ -409,8 +410,15 @@ public class PlayerController : MonoBehaviour
         var combinedVelocity = thisVelocity + otherVelocity;
         var highestSpeed = Mathf.Max(thisVelocity.magnitude, otherVelocity.magnitude);
         var combinedSpeed = combinedVelocity.magnitude;
-        var shovePercent = Mathf.Clamp01(combinedSpeed / highestSpeed); // 1.0 = all shove, 0.0 = all shake, 0.5 = half shove half shake, etc.
-        var shakePercent = 1f - shovePercent;
+        var shovePercent = 0f;
+        var shakePercent = 0f;
+        // Prevent any NaN values as a result of division by 0
+        // (in this case, the 0 divisor could come from a collision at 0 velocity like if the players started the game sitting on the ground)
+        if (highestSpeed > 0f)
+        {
+            shovePercent = Mathf.Clamp01(combinedSpeed / highestSpeed); // 1.0 = all shove, 0.0 = all shake, 0.5 = half shove half shake, etc.
+            shakePercent = 1f - shovePercent;
+        }
         cameraController.Shove(collision.contacts[0].normal * Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * shovePercent);
         cameraController.Shake(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * .2f * shakePercent);
 
