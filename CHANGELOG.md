@@ -102,7 +102,7 @@
 - Arena is always in view of the camera, even if the horizontal size of the camera gets smaller than the arena width (before this update, the sides of the arena would just go out of view of the camera if the horizontal camera size was too small)
 - Health change obstacles have bubble effects to go with the liquid physics
 - Instant death obstacles have a "saw blade" effect
-- *[TECHNICAL] Recreated the ability system so it's a lot more configurable*
+- *[TECHNICAL] Created an official ability system*
 ### Changed
 - The space outside of the arena shows as black instead of being able to see stuff out of bounds
 
@@ -120,12 +120,26 @@
 ## V 0.14 // Cheats Update &nbsp; `2021-10-01 15:24`
 ### Added
 - A cheat menu accessible by pressing `/` that can heal or kill players (more options planned to be added)
+- *[TECHNICAL] Created an official UI system*
 ### Changed
 - Heal obstacles now have the same buoyancy force as the damage obstacles
 - Removed saw blade effect from instant death obstacles
 - The outside of the arena appears gray like the walls instead of black
-- *[TECHNICAL] Recreated the UI system so it's more flexible and a lot of the functionality is done automatically*
 ### Fixed
 - Fixed the camera breaking with (NaN, NaN) position if the level starts with the players touching the arena (finally) (this is the same bug mentioned in v0.7)
 - Fixed ability cooldown not working
 - Added title to previous update entry
+
+## V 0.15 // UI v2 &nbsp; `2021-10-03 10:52`
+### Added
+- Help menu
+### Changed
+- Completely recreated the UI because it didn't match the game very well and the code behind it was messy (except for the brand new UI manager system :D)
+### Fixed
+- Edited controls shown in `README.md` to reflect default keybinds
+- Edited damage system info in `README.md`
+  - *"... the other player will win the round if they stay alive for another 3 seconds."* -> *"... the other player will win the round."*
+- Edited v0.12 changelog entry
+  - *"[TECHNICAL] Recreated the ability system so it's a lot more configurable"* -> *"[TECHNICAL] Created an official ability system"*
+- Edited v0.13 changelog entry
+  - *#changed "[TECHNICAL] Recreated the UI system so it's more flexible and a lot of the functionality is done automatically"* -> *#added "[TECHNICAL] Created an official UI system"*

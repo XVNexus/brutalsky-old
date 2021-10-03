@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviour
     {
         if (gameOver)
         {
-            SetTimeScale(gameResetTimer / gameResetDelay);
+            SetTimeScale(Mathf.Pow(gameResetTimer / gameResetDelay, 2f) * .8f + .2f);
             gameResetTimer = Mathf.Max(gameResetTimer - Time.deltaTime / Time.timeScale, 0f);
             if (gameResetTimer == 0f)
             {

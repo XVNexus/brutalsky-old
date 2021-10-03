@@ -1,0 +1,176 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="/Assets/UI Toolkit/Stylesheets/Main.uss" />
+    <ui:VisualElement name="container-message" class="container" style="visibility: hidden;">
+        <ui:Label text="Player 1 wins!" display-tooltip-when-elided="true" name="message-label" class="base" style="font-size: 60px;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="container-menu" class="container" style="visibility: hidden;">
+        <ui:VisualElement class="base panel panel-standalone" style="width: 25%; height: 70%;">
+            <ui:Button text="Continue" display-tooltip-when-elided="true" name="menu-button-continue" class="base button button-major button-single" style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px;" />
+            <ui:Button text="Level Selector" display-tooltip-when-elided="true" name="menu-button-level-selector" class="base button button-minor button-top" style="border-top-left-radius: 5px; border-top-right-radius: 5px; margin-bottom: 0; color: rgb(51, 255, 51);" />
+            <ui:VisualElement style="flex-direction: row;">
+                <ui:Button text="&lt; Prev" display-tooltip-when-elided="true" name="menu-button-prev" class="base button button-minor" style="flex-grow: 1; border-bottom-left-radius: 5px; margin-top: 0; margin-right: 0; color: rgb(153, 255, 153);" />
+                <ui:Button text="Restart" display-tooltip-when-elided="true" name="menu-button-restart" class="base button button-minor" style="flex-grow: 1; margin-left: 0; margin-right: 0; margin-top: 0; color: rgb(153, 255, 153);" />
+                <ui:Button text="Next &gt;" display-tooltip-when-elided="true" name="menu-button-next" class="base button button-minor" style="flex-grow: 1; margin-top: 0; margin-left: 0; color: rgb(153, 255, 153); border-bottom-right-radius: 5px;" />
+            </ui:VisualElement>
+            <ui:Button text="Settings" display-tooltip-when-elided="true" name="menu-button-settings" class="base button button-minor" style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; color: rgb(51, 255, 255);" />
+            <ui:Button text="Help" display-tooltip-when-elided="true" name="menu-button-help" class="base button button-minor" style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; color: rgb(51, 153, 255);" />
+            <ui:VisualElement style="flex-grow: 1;" />
+            <ui:VisualElement style="flex-direction: row;">
+                <ui:Button text="Main Menu" display-tooltip-when-elided="true" name="menu-button-main-menu" class="base button button-minor" style="flex-grow: 1; border-top-left-radius: 5px; border-bottom-left-radius: 5px; margin-right: 0; color: rgb(255, 153, 153);" />
+                <ui:Button text="Exit" display-tooltip-when-elided="true" name="menu-button-exit" class="base button button-minor" style="flex-grow: 1; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: 0; color: rgb(255, 51, 51);" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="container-menu-settings" class="container" style="visibility: hidden;">
+        <ui:ScrollView class="base panel panel-fullscreen" style="padding-left: 25%; padding-right: 25%;">
+            <ui:Foldout text="Controls" name="menu-settings-foldout-controls" value="false" class="base foldout" style="-unity-font-style: bold; height: auto;">
+                <ui:Label text="Player 1" display-tooltip-when-elided="true" class="base label" />
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Move Up" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
+                    <ui:TextField picking-mode="Ignore" text="up arrow" name="menu-settings-controls-player-1-move-up" class="base text-field" style="width: 50%; border-top-left-radius: 5px; border-top-right-radius: 5px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Move Down" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
+                    <ui:TextField picking-mode="Ignore" text="down arrow" name="menu-settings-controls-player-1-move-down" class="base text-field" style="width: 50%;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Move Left" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
+                    <ui:TextField picking-mode="Ignore" text="left arrow" name="menu-settings-controls-player-1-move-left" class="base text-field" style="width: 50%;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Move Right" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
+                    <ui:TextField picking-mode="Ignore" text="right arrow" name="menu-settings-controls-player-1-move-right" class="base text-field" style="width: 50%;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Ability" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
+                    <ui:TextField picking-mode="Ignore" text="return" name="menu-settings-controls-player-1-ability" class="base text-field" style="width: 50%; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;" />
+                </ui:VisualElement>
+                <ui:Label text="Player 2" display-tooltip-when-elided="true" class="base label" />
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Move Up" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
+                    <ui:TextField picking-mode="Ignore" text="w" name="menu-settings-controls-player-2-move-up" class="base text-field" style="width: 50%; border-top-left-radius: 5px; border-top-right-radius: 5px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Move Down" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
+                    <ui:TextField picking-mode="Ignore" text="s" name="menu-settings-controls-player-2-move-down" class="base text-field" style="width: 50%;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Move Left" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
+                    <ui:TextField picking-mode="Ignore" text="a" name="menu-settings-controls-player-2-move-left" class="base text-field" style="width: 50%; height: 40px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Move Right" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
+                    <ui:TextField picking-mode="Ignore" text="d" name="menu-settings-controls-player-2-move-right" class="base text-field" style="width: 50%;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Ability" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
+                    <ui:TextField picking-mode="Ignore" text="back quote" name="menu-settings-controls-player-2-ability" class="base text-field" style="width: 50%; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;" />
+                </ui:VisualElement>
+            </ui:Foldout>
+            <ui:Foldout text="Graphics" name="menu-settings-foldout-graphics" value="false" class="base foldout" style="-unity-font-style: bold; height: auto;">
+                <ui:Label text="Particles" display-tooltip-when-elided="true" class="base label" />
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Effects" display-tooltip-when-elided="true" class="base label" style="-unity-text-align: middle-left; flex-grow: 1;" />
+                    <ui:Toggle name="menu-settings-graphics-particles-effects" value="true" class="base" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
+                    <ui:Label text="Ambient" display-tooltip-when-elided="true" class="base label" style="-unity-text-align: middle-left; flex-grow: 1;" />
+                    <ui:Toggle name="menu-settings-graphics-particles-ambient" value="true" class="base" />
+                </ui:VisualElement>
+            </ui:Foldout>
+        </ui:ScrollView>
+    </ui:VisualElement>
+    <ui:VisualElement name="container-menu-help" class="container">
+        <ui:ScrollView class="base panel panel-fullscreen" style="padding-left: 25%; padding-right: 25%;">
+            <ui:Label text="Brutalsky" display-tooltip-when-elided="true" class="base label" style="-unity-font-style: bold;" />
+            <ui:Label text="A physics-based fighting game with the objective of ramming / baiting / whatever else your opponent until they run out of health and go kaboom!" display-tooltip-when-elided="true" class="base label" style="-unity-text-align: upper-left; height: auto; white-space: normal; -unity-font-style: normal; font-size: 18px;" />
+            <ui:Foldout text="Ability Key" value="false" class="base foldout" style="-unity-font-style: bold; height: auto;">
+                <ui:Label text="The ability key can be used for charging and shielding, depending on player speed. The ability key can also be held while using an ability to increase its power (power increase is based on how long the key is held)." display-tooltip-when-elided="true" class="base label" style="-unity-text-align: upper-left; white-space: normal; -unity-font-style: normal; height: auto; font-size: 16px;" />
+                <ui:Label text="A translucent ring will appear around a player when they are able to use an ability. The ring color shows which ability is currently possible." display-tooltip-when-elided="true" class="base label" style="-unity-text-align: upper-left; white-space: normal; -unity-font-style: normal; height: auto; font-size: 16px;" />
+                <ui:Label text="Below is the different abilities and their attributes:" display-tooltip-when-elided="true" class="base label" style="-unity-text-align: upper-left; white-space: normal; -unity-font-style: normal; height: auto; font-size: 16px;" />
+                <ui:VisualElement style="flex-direction: row; border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-bottom-width: 1px;">
+                    <ui:Label text="Ability" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Required Speed" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Charge Time" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Cooldown" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Ring Color" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="Charge" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="5 - 30 m/s" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label text="3 sec" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label text="2 sec" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label text="cyan" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: normal; white-space: normal; color: rgb(51, 255, 255);" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="Shield" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="?" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label text="?" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label text="?" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label text="yellow" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: normal; white-space: normal; color: rgb(255, 255, 51);" />
+                </ui:VisualElement>
+                <ui:Label text="NOTE: &quot;charge&quot; can either mean the charge ability or the time required for an ability to reach full power while the ability key is being held" display-tooltip-when-elided="true" class="base label" style="-unity-text-align: upper-left; white-space: normal; -unity-font-style: italic; height: auto; font-size: 16px;" />
+            </ui:Foldout>
+            <ui:Foldout text="Damage System" value="false" class="base foldout" style="-unity-font-style: bold; height: auto;">
+                <ui:Label text="Damage is mainly based on impact, so higher speed is always better when ramming your opponent. You are also more resistant to taking damage the faster you&apos;re going, so try not to get attacked while moving slowly or it will hurt a lot more." display-tooltip-when-elided="true" class="base label" style="-unity-text-align: upper-left; white-space: normal; -unity-font-style: normal; height: auto; font-size: 16px;" />
+            </ui:Foldout>
+            <ui:Foldout text="Object Color Meaning" value="false" class="base foldout" style="-unity-font-style: bold; height: auto;">
+                <ui:VisualElement style="flex-direction: row; border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-bottom-width: 1px;">
+                    <ui:Label text="Color" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 25%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Meaning" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 75%; -unity-font-style: bold; white-space: normal;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="Orange" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 25%; -unity-font-style: bold; white-space: normal; color: rgb(255, 153, 51);" />
+                    <ui:Label text="player 1" display-tooltip-when-elided="true" class="base label" style="height: 30px; font-size: 16px; width: 75%; -unity-font-style: normal; white-space: normal; color: rgb(255, 204, 153);" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="Aqua" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 25%; -unity-font-style: bold; white-space: normal; color: rgb(51, 153, 255);" />
+                    <ui:Label text="player 2" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 75%; -unity-font-style: normal; white-space: normal; color: rgb(153, 204, 255);" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="Gray" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 25%; -unity-font-style: bold; white-space: normal; color: rgb(153, 153, 153);" />
+                    <ui:Label text="wall" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 75%; -unity-font-style: normal; white-space: normal; color: rgb(204, 204, 204);" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="Red" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 25%; -unity-font-style: bold; white-space: normal; color: rgb(255, 51, 51);" />
+                    <ui:Label text="damage obstacle" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 75%; -unity-font-style: normal; white-space: normal; color: rgb(255, 153, 153);" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="Green" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 25%; -unity-font-style: bold; white-space: normal; color: rgb(51, 255, 51);" />
+                    <ui:Label text="health obstacle" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 75%; -unity-font-style: normal; white-space: normal; color: rgb(153, 255, 153);" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="Yellow" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 25%; -unity-font-style: bold; white-space: normal; color: rgb(255, 255, 51);" />
+                    <ui:Label text="instant death obstacle" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 75%; -unity-font-style: normal; white-space: normal; color: rgb(255, 255, 153);" />
+                </ui:VisualElement>
+            </ui:Foldout>
+            <ui:Foldout text="Default Controls" value="false" class="base foldout" style="-unity-font-style: bold; height: auto;">
+                <ui:Label text="To change the controls, go to menu &gt; settings &gt; controls and input the key codes in the text boxes. (Key code reference: https://docs.unity3d.com/ScriptReference/KeyCode.html)" display-tooltip-when-elided="true" class="base label" style="-unity-text-align: upper-left; white-space: normal; -unity-font-style: normal; height: auto; font-size: 16px;" />
+                <ui:VisualElement style="flex-direction: row; border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-bottom-width: 1px;">
+                    <ui:Label text="Player" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Up" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 16%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Down" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 16%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Left" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 16%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Right" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 16%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Ability" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 16%; -unity-font-style: bold; white-space: normal;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="1" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="up" display-tooltip-when-elided="true" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label display-tooltip-when-elided="true" text="down" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label display-tooltip-when-elided="true" text="left" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label display-tooltip-when-elided="true" text="right" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label display-tooltip-when-elided="true" text="enter" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="2" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label display-tooltip-when-elided="true" text="w" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label display-tooltip-when-elided="true" text="s" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label display-tooltip-when-elided="true" text="a" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label display-tooltip-when-elided="true" text="d" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
+                    <ui:Label display-tooltip-when-elided="true" text="`" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
+                </ui:VisualElement>
+            </ui:Foldout>
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

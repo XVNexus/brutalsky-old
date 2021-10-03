@@ -5,21 +5,47 @@ using UnityEngine.SceneManagement;
 
 public class UIWindow
 {
-    public string id { get; private set; }
-    public VisualElement container { get; private set; }
-    //TODO: Add more usable parent and children editor
-    public UIWindow parent { get; set; }
-    public UIWindow[] children { get; set; }
-    public int layer { get; private set; }
-    public bool Active { get => container.visible; private set => container.visible = value; }
-
-    public UIWindow(string id, int layer, VisualElement container, UIWindow parent = null, UIWindow[] children = null, bool active = false)
+    public string Id { get; private set; }
+    public int Layer { get; private set; }
+    public VisualElement Container { get; private set; }
+    private UIWindow parent;
+    public UIWindow Parent
     {
-        this.id = id;
-        this.layer = layer;
-        this.container = container;
-        this.parent = parent;
-        this.children = children != null ? children : new UIWindow[] { };
+        get => parent;
+        private set
+        {
+            parent = value;
+            if (!value.children.Contains(this))
+            {
+                value.children.Add(this);
+            }  
+        }
+    }
+    private List<UIWindow> children;
+    public List<UIWindow> Children
+    {
+        get => children;
+        private set
+        {
+            children = value;
+            foreach (var child in value)
+            {
+                child.parent = this;
+            }
+        }
+    }
+    public bool Active { get => Container.visible; private set => Container.visible = value; }
+
+    public UIWindow(string id, int layer, VisualElement container, UIWindow parent = null, List<UIWindow> children = null, bool active = false)
+    {
+        Id = id;
+        Layer = layer;
+        Container = container;
+        if (parent != null)
+        {
+            Parent = parent;
+        }
+        Children = children != null ? children : new List<UIWindow>();
         Active = active;
     }
 
@@ -38,7 +64,7 @@ public class UIWindow
     public void Open()
     {
         Active = true;
-        container.visible = true;
+        Container.visible = true;
     }
 
     public void Close()
@@ -78,7 +104,7 @@ public class UIManager
     {
         foreach (var activeWindow in GetActiveWindows())
         {
-            if (activeWindow.layer == window.layer)
+            if (activeWindow.Layer == window.Layer)
             {
                 activeWindow.Close();
             }
@@ -86,14 +112,29 @@ public class UIManager
         window.Open();
     }
 
+    public void OpenWindow(string id)
+    {
+        OpenWindow(GetWindow(id));
+    }
+
     public void CloseWindow(UIWindow window)
     {
         window.Close();
     }
 
+    public void CloseWindow(string id)
+    {
+        CloseWindow(GetWindow(id));
+    }
+
     public void ToggleWindow(UIWindow window)
     {
         window.Toggle();
+    }
+
+    public void ToggleWindow(string id)
+    {
+        ToggleWindow(GetWindow(id));
     }
 
     public void CloseAllWindows()
@@ -114,21 +155,36 @@ public class UIManager
 
     public UIWindow GetWindow(string id)
     {
-        foreach (var window in windows)
+        if (!id.StartsWith("#"))
         {
-            if (window.id == id)
+            foreach (var window in windows)
             {
-                return window;
+                if (window.Id == id)
+                {
+                    return window;
+                }
+            }
+            return null;
+        }
+        else
+        {
+            switch (id.Substring(1))
+            {
+                case "top":
+                    return GetTopWindow();
+                case "bottom":
+                    return GetBottomWindow();
+                default:
+                    return null;
             }
         }
-        return null;
     }
 
     public UIWindow GetWindow(VisualElement container)
     {
         foreach (var window in windows)
         {
-            if (window.container == container)
+            if (window.Container == container)
             {
                 return window;
             }
@@ -146,7 +202,26 @@ public class UIManager
             for (var i = 1; i < activeWindows.Length; i++)
             {
                 var activeWindow = activeWindows[i];
-                if (activeWindow.layer > result.layer)
+                if (activeWindow.Layer > result.Layer)
+                {
+                    result = activeWindow;
+                }
+            }
+        }
+        return result;
+    }
+
+    public UIWindow GetBottomWindow()
+    {
+        UIWindow result = null;
+        var activeWindows = GetActiveWindows();
+        if (activeWindows.Length > 0)
+        {
+            result = activeWindows[0];
+            for (var i = 1; i < activeWindows.Length; i++)
+            {
+                var activeWindow = activeWindows[i];
+                if (activeWindow.Layer < result.Layer)
                 {
                     result = activeWindow;
                 }
@@ -195,9 +270,9 @@ public class UIManager
         var result = true;
 
         // Part 1: Check if window's parent is active
-        if (window.parent != null)
+        if (window.Parent != null)
         {
-            result = window.parent.Active;
+            result = window.Parent.Active;
         }
 
         // Part 2: Check if there are no other active windows in the same layer (e.g. main menu and hacks menu open at the same time)
@@ -205,13 +280,18 @@ public class UIManager
         for (var i = 0; i < activeWindows.Length && result; i++)
         {
             var activeWindow = activeWindows[i];
-            if (activeWindow.Active && activeWindow.layer == window.layer)
+            if (activeWindow.Active && activeWindow.Layer == window.Layer)
             {
                 result = false;
             }
         }
 
         return result;
+    }
+
+    public bool IsActiveWindowValid(string id)
+    {
+        return IsActiveWindowValid(GetWindow(id));
     }
 }
 
@@ -220,43 +300,41 @@ public class UIController : MonoBehaviour
     [Header("Object References")]
     public GameManager gameManager;
 
-    // Win text group
-    public VisualElement containerWinText;
-    public Label labelWinText;
+    // Message group
+    public VisualElement containerMessage;
+    public Label messageLabel;
 
     // Menu group
     public VisualElement containerMenu;
-    public Button buttonContinue;
-    public Button buttonRestart;
-    public Button buttonSettings;
-    public Button buttonHelp;
-    public Button buttonExit;
+    public Button menuButtonContinue;
+    public Button menuButtonLevelSelector;
+    public Button menuButtonPrev;
+    public Button menuButtonRestart;
+    public Button menuButtonNext;
+    public Button menuButtonSettings;
+    public Button menuButtonHelp;
+    public Button menuButtonMainMenu;
+    public Button menuButtonExit;
 
     // Settings group
-    public VisualElement containerSettings;
-    public Foldout foldoutControls;
-    public TextField textFieldP1MoveUp;
-    public TextField textFieldP1MoveDown;
-    public TextField textFieldP1MoveLeft;
-    public TextField textFieldP1MoveRight;
-    public TextField textFieldP1Ability;
-    public TextField textFieldP2MoveUp;
-    public TextField textFieldP2MoveDown;
-    public TextField textFieldP2MoveLeft;
-    public TextField textFieldP2MoveRight;
-    public TextField textFieldP2Ability;
-    public Foldout foldoutGraphics;
-    public Toggle toggleCameraShake;
-    public Toggle toggleParticlesPlayer;
-    public Toggle toggleParticlesAmbient;
+    public VisualElement containerMenuSettings;
+    public Foldout menuSettingsFoldoutControls;
+    public TextField menuSettingsControlsPlayer1MoveUp;
+    public TextField menuSettingsControlsPlayer1MoveDown;
+    public TextField menuSettingsControlsPlayer1MoveLeft;
+    public TextField menuSettingsControlsPlayer1MoveRight;
+    public TextField menuSettingsControlsPlayer1Ability;
+    public TextField menuSettingsControlsPlayer2MoveUp;
+    public TextField menuSettingsControlsPlayer2MoveDown;
+    public TextField menuSettingsControlsPlayer2MoveLeft;
+    public TextField menuSettingsControlsPlayer2MoveRight;
+    public TextField menuSettingsControlsPlayer2Ability;
+    public Foldout menuSettingsFoldoutGraphics;
+    public Toggle menuSettingsGraphicsParticlesEffects;
+    public Toggle menuSettingsGraphicsParticlesAmbient;
 
-    // Hacks menu group
-    public VisualElement containerHacks;
-    public Button buttonHealPlayer1;
-    public Button buttonHealPlayer2;
-    public Button buttonKillPlayer1;
-    public Button buttonKillPlayer2;
-    public Button buttonClose;
+    // Help group
+    public VisualElement containerMenuHelp;
 
     private List<VisualElement> activeContainers = new List<VisualElement>();
     private UIManager uiManager;
@@ -265,129 +343,110 @@ public class UIController : MonoBehaviour
     {
         var root = GetComponent<UIDocument>().rootVisualElement;
 
-        // Win text group
-        containerWinText = root.Q<VisualElement>("container-win-text");
-        labelWinText = containerWinText.Q<Label>("label-win-text");
+        // Message group
+        containerMessage = root.Q<VisualElement>("container-message");
+        messageLabel = containerMessage.Q<Label>("message-label");
 
         // Menu group
         containerMenu = root.Q<VisualElement>("container-menu");
-        buttonContinue = containerMenu.Q<Button>("button-continue");
-        buttonRestart = containerMenu.Q<Button>("button-restart");
-        buttonSettings = containerMenu.Q<Button>("button-settings");
-        buttonHelp = containerMenu.Q<Button>("button-help");
-        buttonExit = containerMenu.Q<Button>("button-exit");
+        menuButtonContinue = containerMenu.Q<Button>("menu-button-continue");
+        menuButtonLevelSelector = containerMenu.Q<Button>("menu-button-level-selector");
+        menuButtonPrev = containerMenu.Q<Button>("menu-button-prev");
+        menuButtonRestart = containerMenu.Q<Button>("menu-button-restart");
+        menuButtonNext = containerMenu.Q<Button>("menu-button-next");
+        menuButtonSettings = containerMenu.Q<Button>("menu-button-settings");
+        menuButtonHelp = containerMenu.Q<Button>("menu-button-help");
+        menuButtonMainMenu = containerMenu.Q<Button>("menu-button-main-menu");
+        menuButtonExit = containerMenu.Q<Button>("menu-button-exit");
 
-        buttonContinue.clicked += ActContinue;
-        buttonRestart.clicked += ActRestart;
-        buttonSettings.clicked += ActSettings;
-        buttonHelp.clicked += ActHelp;
-        buttonExit.clicked += ActExit;
+        menuButtonContinue.clicked += ActMenuContinue;
+        menuButtonLevelSelector.clicked += ActMenuLevelSelector;
+        menuButtonPrev.clicked += ActMenuPrev;
+        menuButtonRestart.clicked += ActMenuRestart;
+        menuButtonNext.clicked += ActMenuNext;
+        menuButtonSettings.clicked += ActMenuSettings;
+        menuButtonHelp.clicked += ActMenuHelp;
+        menuButtonMainMenu.clicked += ActMenuMainMenu;
+        menuButtonExit.clicked += ActMenuExit;
 
         // Settings group
-        containerSettings = root.Q<VisualElement>("container-settings");
-        foldoutControls = root.Q<Foldout>("foldout-controls");
-        textFieldP1MoveUp = root.Q<TextField>("text-field-p1-move-up");
-        textFieldP1MoveDown = root.Q<TextField>("text-field-p1-move-down");
-        textFieldP1MoveLeft = root.Q<TextField>("text-field-p1-move-left");
-        textFieldP1MoveRight = root.Q<TextField>("text-field-p1-move-right");
-        textFieldP1Ability = root.Q<TextField>("text-field-p1-ability");
-        textFieldP2MoveUp = root.Q<TextField>("text-field-p2-move-up");
-        textFieldP2MoveDown = root.Q<TextField>("text-field-p2-move-down");
-        textFieldP2MoveLeft = root.Q<TextField>("text-field-p2-move-left");
-        textFieldP2MoveRight = root.Q<TextField>("text-field-p2-move-right");
-        textFieldP2Ability = root.Q<TextField>("text-field-p2-ability");
-        foldoutGraphics = root.Q<Foldout>("foldout-graphics");
-        toggleCameraShake = root.Q<Toggle>("toggle-camera-shake");
-        toggleParticlesPlayer = root.Q<Toggle>("toggle-particles-player");
-        toggleParticlesAmbient = root.Q<Toggle>("toggle-particles-ambient");
+        containerMenuSettings = root.Q<VisualElement>("container-menu-settings");
+        menuSettingsFoldoutControls = containerMenuSettings.Q<Foldout>("menu-settings-foldout-controls");
+        menuSettingsControlsPlayer1MoveUp = containerMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-up");
+        menuSettingsControlsPlayer1MoveDown = containerMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-down");
+        menuSettingsControlsPlayer1MoveLeft = containerMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-left");
+        menuSettingsControlsPlayer1MoveRight = containerMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-right");
+        menuSettingsControlsPlayer1Ability = containerMenuSettings.Q<TextField>("menu-settings-controls-player-1-ability");
+        menuSettingsControlsPlayer2MoveUp = containerMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-up");
+        menuSettingsControlsPlayer2MoveDown = containerMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-down");
+        menuSettingsControlsPlayer2MoveLeft = containerMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-left");
+        menuSettingsControlsPlayer2MoveRight = containerMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-right");
+        menuSettingsControlsPlayer2Ability = containerMenuSettings.Q<TextField>("menu-settings-controls-player-2-ability");
+        menuSettingsFoldoutGraphics = containerMenuSettings.Q<Foldout>("menu-settings-foldout-graphics");
+        menuSettingsGraphicsParticlesEffects = containerMenuSettings.Q<Toggle>("menu-settings-graphics-particles-effects");
+        menuSettingsGraphicsParticlesAmbient = containerMenuSettings.Q<Toggle>("menu-settings-graphics-particles-ambient");
 
-        // Hacks menu group
-        containerHacks = root.Q<VisualElement>("container-hacks");
-        buttonHealPlayer1 = containerHacks.Q<Button>("button-heal-player-1");
-        buttonHealPlayer2 = containerHacks.Q<Button>("button-heal-player-2");
-        buttonKillPlayer1 = containerHacks.Q<Button>("button-kill-player-1");
-        buttonKillPlayer2 = containerHacks.Q<Button>("button-kill-player-2");
-        buttonClose = containerHacks.Q<Button>("button-close");
+        // Help group
+        containerMenuHelp = root.Q<VisualElement>("container-menu-help");
 
-        buttonHealPlayer1.clicked += ActHealPlayer1;
-        buttonHealPlayer2.clicked += ActHealPlayer2;
-        buttonKillPlayer1.clicked += ActKillPlayer1;
-        buttonKillPlayer2.clicked += ActKillPlayer2;
-        buttonClose.clicked += ActClose;
-
-        // Hide menus by default
-        containerWinText.visible = false;
-        containerMenu.visible = false;
-        containerHacks.visible = false;
-        containerSettings.visible = false;
-        foldoutControls.value = false;
-        foldoutGraphics.value = false;
-
-        // Set up UI manager
-        var uiWindowMenu = new UIWindow("menu", 1, containerMenu);
-        var uiWindowSettings = new UIWindow("menu.settings", 2, containerSettings);
-        var uiWindowHacks = new UIWindow("hacks", 1, containerHacks);
-        uiWindowMenu.children = new UIWindow[] { uiWindowSettings };
-        uiWindowSettings.parent = uiWindowMenu;
-
-        uiManager = new UIManager(new UIWindow[] { uiWindowMenu, uiWindowSettings, uiWindowHacks });
+        // Set up UI system
+        containerMessage.visible = false;
+        var uiWindowMenu = new UIWindow("menu", 0, containerMenu);
+        var uiWindowMenuSettings = new UIWindow("menu.settings", 1, containerMenuSettings, uiWindowMenu);
+        var uiWindowMenuHelp = new UIWindow("menu.help", 1, containerMenuHelp, uiWindowMenu);
+        uiManager = new UIManager(new UIWindow[] { uiWindowMenu, uiWindowMenuSettings, uiWindowMenuHelp });
     }
 
-    public void ShowWinText(int playerNum, Color playerColor)
+    private void ActMenuContinue()
     {
-        containerWinText.visible = true;
-        labelWinText.text = $"Player {playerNum} wins!";
-        labelWinText.style.color = playerColor;
+        uiManager.CloseWindow("menu");
     }
 
-    void ActContinue()
+    private void ActMenuLevelSelector()
     {
-        uiManager.CloseWindow(uiManager.GetWindow("menu"));
+        Debug.LogWarning("menu:@level-selector");
     }
 
-    void ActRestart()
+    private void ActMenuPrev()
     {
-        SceneManager.LoadScene("Main");
+        Debug.LogWarning("menu:@previous");
     }
 
-    void ActSettings()
+    private void ActMenuRestart()
     {
-        uiManager.OpenWindow(uiManager.GetWindow("menu.settings"));
+        gameManager.ReloadGame();
     }
 
-    void ActHelp()
+    private void ActMenuNext()
     {
-
+        Debug.LogWarning("menu:@next");
     }
 
-    void ActExit()
+    private void ActMenuSettings()
+    {
+        uiManager.OpenWindow("menu.settings");
+    }
+
+    private void ActMenuHelp ()
+    {
+        uiManager.OpenWindow("menu.help");
+    }
+
+    private void ActMenuMainMenu()
+    {
+        Debug.LogWarning("menu:@main-menu");
+    }
+
+    private void ActMenuExit()
     {
         Application.Quit();
     }
 
-    void ActHealPlayer1()
+    public void ShowWinText(int playerNum, Color playerColor)
     {
-        gameManager.ChangePlayerHealth(1, 100);
-    }
-
-    void ActHealPlayer2()
-    {
-        gameManager.ChangePlayerHealth(2, 100);
-    }
-
-    void ActKillPlayer1()
-    {
-        gameManager.ChangePlayerHealth(1, -100);
-    }
-
-    void ActKillPlayer2()
-    {
-        gameManager.ChangePlayerHealth(2, -100);
-    }
-
-    void ActClose()
-    {
-        uiManager.CloseWindow(uiManager.GetWindow("hacks"));
+        containerMessage.visible = true;
+        messageLabel.text = $"Player {playerNum} wins!";
+        messageLabel.style.color = playerColor;
     }
 
     void Update()
@@ -396,23 +455,16 @@ public class UIController : MonoBehaviour
         {
             if (uiManager.GetActiveWindows().Length > 0)
             {
-                uiManager.CloseWindow(uiManager.GetTopWindow());
+                uiManager.CloseWindow("#top");
             }
             else
             {
-                uiManager.OpenWindow(uiManager.GetWindow("menu"));
+                uiManager.OpenWindow("menu");
             }
         }
         if (Input.GetKeyDown(KeyCode.Slash))
         {
-            if (!uiManager.GetWindow("hacks").Active)
-            {
-                uiManager.OpenWindow(uiManager.GetWindow("hacks"));
-            }
-            else
-            {
-                uiManager.CloseWindow(uiManager.GetWindow("hacks"));
-            }
+            uiManager.ToggleWindow("hacks");
         }
     }
 }

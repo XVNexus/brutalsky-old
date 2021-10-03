@@ -33,7 +33,7 @@ When a player's health hits 0, they will explode (I'm so proud of my explosion e
 
 ### Player 1
 - **Move:** `🠙` `🠘` `🠛` `🠚`
-- **Ability:** `'`
+- **Ability:** `enter`
 
 ### Player 2
 - **Move:** `W` `A` `S` `D`

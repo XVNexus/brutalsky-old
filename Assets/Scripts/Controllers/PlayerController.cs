@@ -29,19 +29,20 @@ public struct AbilitySettings
 
 public abstract class Ability
 {
-    public AbilitySettings settings;
-    public AbilityState state { get; private set; } = AbilityState.IDLE;
-    public float chargeTimer { get; private set; } = 0f;
-    public float activeTimer { get; private set; } = 0f;
-    public float cooldownTimer { get; private set; } = 0f;
-    public float ChargeCompletePercent { get => chargeTimer / settings.chargeTime; }
-    public float ActiveCompletePercent { get => (settings.activeTime - activeTimer) / settings.activeTime; }
-    public float CooldownCompletePercent { get => (settings.cooldownTime - cooldownTimer) / settings.cooldownTime; }
+    public AbilitySettings Settings { get; set; }
+    public AbilityState State { get; private set; } = AbilityState.IDLE;
+    public float ChargeTimer { get; private set; } = 0f;
+    public float ActiveTimer { get; private set; } = 0f;
+    public float CooldownTimer { get; private set; } = 0f;
+    public float ChargeCompletePercent { get => ChargeTimer / Settings.chargeTime; }
+    public float ActiveCompletePercent { get => (Settings.activeTime - ActiveTimer) / Settings.activeTime; }
+    public float CooldownCompletePercent { get => (Settings.cooldownTime - CooldownTimer) / Settings.cooldownTime; }
+
     private bool activationQueued = false;
 
     public Ability(AbilitySettings settings)
     {
-        this.settings = settings;
+        Settings = settings;
     }
 
     /// <summary>
@@ -50,9 +51,9 @@ public abstract class Ability
     /// <param name="player"></param>
     public void Initiate(PlayerController player)
     {
-        if (state == AbilityState.IDLE)
+        if (State == AbilityState.IDLE)
         {
-            state = AbilityState.CHARGING;
+            State = AbilityState.CHARGING;
             OnInitiate(player);
         }
     }
@@ -64,12 +65,12 @@ public abstract class Ability
     public void Activate(PlayerController player)
     {
         var isPlayerSpeedInRange = IsSpeedInRange(player.rigidbody.velocity.magnitude);
-        if (state == AbilityState.CHARGING && isPlayerSpeedInRange)
+        if (State == AbilityState.CHARGING && isPlayerSpeedInRange)
         {
-            state = AbilityState.ACTIVE;
-            activeTimer = settings.activeTime;
+            State = AbilityState.ACTIVE;
+            ActiveTimer = Settings.activeTime;
             OnActivate(player, ChargeCompletePercent);
-            chargeTimer = 0f;
+            ChargeTimer = 0f;
         }
         else if (!isPlayerSpeedInRange)
         {
@@ -83,23 +84,23 @@ public abstract class Ability
     /// <param name="player"></param>
     public void Deactivate(PlayerController player)
     {
-        if (state == AbilityState.ACTIVE)
+        if (State == AbilityState.ACTIVE)
         {
-            state = AbilityState.COOLDOWN;
-            cooldownTimer = settings.cooldownTime;
+            State = AbilityState.COOLDOWN;
+            CooldownTimer = Settings.cooldownTime;
             OnDeactivate(player, ActiveCompletePercent);
-            activeTimer = 0f;
+            ActiveTimer = 0f;
         }
     }
 
     public bool IsActivatable(float speed)
     {
-        return state == AbilityState.IDLE && IsSpeedInRange(speed);
+        return State == AbilityState.IDLE && IsSpeedInRange(speed);
     }
 
     public bool IsSpeedInRange(float speed)
     {
-        return speed >= settings.minMaxSpeed.x && speed <= settings.minMaxSpeed.y;
+        return speed >= Settings.minMaxSpeed.x && speed <= Settings.minMaxSpeed.y;
     }
 
     /// <summary>
@@ -151,7 +152,7 @@ public abstract class Ability
     /// <param name="player"></param>
     public virtual void UpdateTimers(float deltaTime, PlayerController player)
     {
-        switch (state)
+        switch (State)
         {
             case AbilityState.IDLE:
                 break;
@@ -161,9 +162,9 @@ public abstract class Ability
                     Activate(player);
                     activationQueued = false;
                 }
-                if (chargeTimer < settings.chargeTime)
+                if (ChargeTimer < Settings.chargeTime)
                 {
-                    chargeTimer = Mathf.Min(chargeTimer + deltaTime, settings.chargeTime);
+                    ChargeTimer = Mathf.Min(ChargeTimer + deltaTime, Settings.chargeTime);
                     OnCharging(player, ChargeCompletePercent);
                 }
                 else
@@ -172,9 +173,9 @@ public abstract class Ability
                 }
                 break;
             case AbilityState.ACTIVE:
-                if (activeTimer > 0f)
+                if (ActiveTimer > 0f)
                 {
-                    activeTimer = Mathf.Max(activeTimer - deltaTime, 0f);
+                    ActiveTimer = Mathf.Max(ActiveTimer - deltaTime, 0f);
                     OnActive(player, ActiveCompletePercent);
                 }
                 else
@@ -183,15 +184,15 @@ public abstract class Ability
                 }
                 break;
             case AbilityState.COOLDOWN:
-                if (cooldownTimer > 0f)
+                if (CooldownTimer > 0f)
                 {
-                    cooldownTimer = Mathf.Max(cooldownTimer - deltaTime, 0f);
+                    CooldownTimer = Mathf.Max(CooldownTimer - deltaTime, 0f);
                     OnCooldown(player, CooldownCompletePercent);
 
                 }
                 else
                 {
-                    state = AbilityState.IDLE;
+                    State = AbilityState.IDLE;
                     OnReady(player);
                 }
                 break;
@@ -245,6 +246,7 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Object References")]
     public GameManager gameManager;
+    public InputManager inputManager;
     public new Rigidbody2D rigidbody;
     public Transform healthBar;
     public SpriteRenderer healthRing;
@@ -273,7 +275,6 @@ public class PlayerController : MonoBehaviour
     private float healthSmoothed = 100f;
     // Used when adding/subtracting fractional values from health to store the non-integer part of the delta for later
     private float healthFractionalBuffer = 0f;
-    private bool abilityKeyDown = false;
 
     [HideInInspector]
     public Vector2 velocityThisFrame = new Vector2();
@@ -294,9 +295,19 @@ public class PlayerController : MonoBehaviour
         ChangeHealth(amount);
     }
 
+    public void Revive()
+    {
+        Heal(100);
+    }
+
     public void Damage(float amount)
     {
         ChangeHealth(-amount);
+    }
+
+    public void Kill()
+    {
+        Damage(100);
     }
 
     public void ChangeHealth(float delta, float healthMin = 0f, float healthMax = 100f)
@@ -347,7 +358,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         UpdateUI();
-        if (Input.GetAxis($"P{playerNum} Ability") > 0f && !abilityKeyDown)
+        if (inputManager.GetKeyDown($"player_{playerNum}.ability"))
         {
             for (var i = 0; i < abilities.Length && activeAbility == null; i++)
             {
@@ -358,26 +369,14 @@ public class PlayerController : MonoBehaviour
                     activeAbility = ability;
                 }
             }
-            abilityKeyDown = true;
         }
-        else if (Input.GetAxis($"P{playerNum} Ability") == 0f && abilityKeyDown)
+        else if (inputManager.GetKeyUp($"player_{playerNum}.ability"))
         {
             if (activeAbility != null)
             {
                 activeAbility.Activate(this);
             }
-            abilityKeyDown = false;
         }
-        /*if (Input.GetAxis($"P{playerNum} Ability") > 0f && speed > attackMinMaxSpeed.x && speed < attackMinMaxSpeed.y && attackCooldownTimer == 0f)
-        {
-            rigidbody.AddForce(rigidbody.velocity.normalized * attackPower, ForceMode2D.Impulse);
-            attackCooldownTimer = attackCooldown;
-            // Play charge trail effect if it's not already playing
-            if (trailEffect.isStopped)
-            {
-                trailEffect.Play();
-            }
-        }*/
     }
 
     void FixedUpdate()
@@ -385,7 +384,10 @@ public class PlayerController : MonoBehaviour
         UpdateCooldowns();
 
         // Update movement
-        var moveVector = new Vector2(Input.GetAxis($"P{playerNum} Horizontal"), Input.GetAxis($"P{playerNum} Vertical")).normalized;
+        var moveVector = new Vector2(
+            inputManager.GetAxisValue($"player_{playerNum}.move.horizontal"),
+            inputManager.GetAxisValue($"player_{playerNum}.move.vertical")
+        ).normalized;
         rigidbody.AddForce(moveVector * movePower);
 
         // Update stored velocity
@@ -428,7 +430,7 @@ public class PlayerController : MonoBehaviour
         // Stop charge ability if it's active
         if (activeAbility is AbilityAttack)
         {
-            if (activeAbility.state == AbilityState.ACTIVE)
+            if (activeAbility.State == AbilityState.ACTIVE)
             {
                 activeAbility.Deactivate(this);
             }
@@ -464,7 +466,7 @@ public class PlayerController : MonoBehaviour
         {
             if (ability.IsActivatable(rigidbody.velocity.magnitude) && activeAbility == null)
             {
-                targetColor = ability.settings.color;
+                targetColor = ability.Settings.color;
             }
         }
         var currentColor = powerRing.color;
@@ -483,7 +485,7 @@ public class PlayerController : MonoBehaviour
         }
         if (activeAbility != null)
         {
-            if (activeAbility.state == AbilityState.COOLDOWN)
+            if (activeAbility.State == AbilityState.COOLDOWN)
             {
                 activeAbility = null;
             }
