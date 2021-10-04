@@ -85,7 +85,7 @@
 ### Fixed
 - `README.md` was broken
 
-## V 0.11 &nbsp; `2021-09-14 21:49`
+## V 0.11 // Changelog Update &nbsp; `2021-09-14 21:49`
 ### Added
 - `CHANGELOG.md` (this file you are reading right now)
 ### Changed
@@ -96,7 +96,7 @@
 ### Fixed
 - It's no longer possible to escape the arena by going into the health change obstacles and through the sides of them (added walls to block the open gaps on the sides)
 
-## V 0.12 &nbsp; `2021-09-28 13:39`
+## V 0.12 // Charge Up(date) &nbsp; `2021-09-28 13:39`
 ### Added
 - The ability key can be held while using the charge ability to add extra power to the charge (you will see some particles as an indicator of charge power, more particles = more power)
 - Arena is always in view of the camera, even if the horizontal size of the camera gets smaller than the arena width (before this update, the sides of the arena would just go out of view of the camera if the horizontal camera size was too small)
@@ -143,3 +143,15 @@
   - *"[TECHNICAL] Recreated the ability system so it's a lot more configurable"* -> *"[TECHNICAL] Created an official ability system"*
 - Edited v0.13 changelog entry
   - *#changed "[TECHNICAL] Recreated the UI system so it's more flexible and a lot of the functionality is done automatically"* -> *#added "[TECHNICAL] Created an official UI system"*
+
+## V 0.16 // Motion Update &nbsp; `2021-10-03 21:34`
+### Added
+- Crusher obstacle (I finally fulfilled my desire to add a dynamic obstacle :D)
+  - New crushing physics which causes players to continually take damage while squeezed between objects (not really noticeable most of the time because it only affects the player with extreme crushing force)
+- [[^]](https://github.com/XVNexus/brutalsky/issues/5) Settings are saved in system storage so that they stay the same even after restarting the game
+### Changed
+- Widened lava pools from 9 meters to 10 meters
+### Fixed
+- [[^]](https://github.com/XVNexus/brutalsky/issues/3) The outer arena walls weren't getting illuminated by player lights due to the wrong material being assigned to them
+- Updated `README.md` and game help menu with new color meaning entry for dynamic (moving) walls
+- Added titles to update entries for v0.11 and v0.12

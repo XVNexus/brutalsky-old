@@ -18,7 +18,7 @@ public class UIWindow
             if (!value.children.Contains(this))
             {
                 value.children.Add(this);
-            }  
+            }
         }
     }
     private List<UIWindow> children;
@@ -299,6 +299,7 @@ public class UIController : MonoBehaviour
 {
     [Header("Object References")]
     public GameManager gameManager;
+    public InputManager inputManager;
 
     // Message group
     public VisualElement containerMessage;
@@ -318,6 +319,8 @@ public class UIController : MonoBehaviour
 
     // Settings group
     public VisualElement containerMenuSettings;
+    public Button menuSettingsButtonSaveChanges;
+    public Button menuSettingsButtonDiscardChanges;
     public Foldout menuSettingsFoldoutControls;
     public TextField menuSettingsControlsPlayer1MoveUp;
     public TextField menuSettingsControlsPlayer1MoveDown;
@@ -336,7 +339,6 @@ public class UIController : MonoBehaviour
     // Help group
     public VisualElement containerMenuHelp;
 
-    private List<VisualElement> activeContainers = new List<VisualElement>();
     private UIManager uiManager;
 
     void Start()
@@ -371,6 +373,8 @@ public class UIController : MonoBehaviour
 
         // Settings group
         containerMenuSettings = root.Q<VisualElement>("container-menu-settings");
+        menuSettingsButtonSaveChanges = containerMenuSettings.Q<Button>("menu-settings-button-save-changes");
+        menuSettingsButtonDiscardChanges = containerMenuSettings.Q<Button>("menu-settings-button-discard-changes");
         menuSettingsFoldoutControls = containerMenuSettings.Q<Foldout>("menu-settings-foldout-controls");
         menuSettingsControlsPlayer1MoveUp = containerMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-up");
         menuSettingsControlsPlayer1MoveDown = containerMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-down");
@@ -386,6 +390,9 @@ public class UIController : MonoBehaviour
         menuSettingsGraphicsParticlesEffects = containerMenuSettings.Q<Toggle>("menu-settings-graphics-particles-effects");
         menuSettingsGraphicsParticlesAmbient = containerMenuSettings.Q<Toggle>("menu-settings-graphics-particles-ambient");
 
+        menuSettingsButtonSaveChanges.clicked += ActMenuSettingsSaveChanges;
+        menuSettingsButtonDiscardChanges.clicked += ActMenuSettingsDiscardChanges;
+
         // Help group
         containerMenuHelp = root.Q<VisualElement>("container-menu-help");
 
@@ -395,6 +402,8 @@ public class UIController : MonoBehaviour
         var uiWindowMenuSettings = new UIWindow("menu.settings", 1, containerMenuSettings, uiWindowMenu);
         var uiWindowMenuHelp = new UIWindow("menu.help", 1, containerMenuHelp, uiWindowMenu);
         uiManager = new UIManager(new UIWindow[] { uiWindowMenu, uiWindowMenuSettings, uiWindowMenuHelp });
+
+        LoadSettings();
     }
 
     private void ActMenuContinue()
@@ -427,7 +436,7 @@ public class UIController : MonoBehaviour
         uiManager.OpenWindow("menu.settings");
     }
 
-    private void ActMenuHelp ()
+    private void ActMenuHelp()
     {
         uiManager.OpenWindow("menu.help");
     }
@@ -442,11 +451,54 @@ public class UIController : MonoBehaviour
         Application.Quit();
     }
 
+    private void ActMenuSettingsSaveChanges()
+    {
+        SaveSettings();
+        inputManager.UpdateKeybinds();
+    }
+
+    private void ActMenuSettingsDiscardChanges()
+    {
+        LoadSettings();
+    }
+
     public void ShowWinText(int playerNum, Color playerColor)
     {
         containerMessage.visible = true;
         messageLabel.text = $"Player {playerNum} wins!";
         messageLabel.style.color = playerColor;
+    }
+
+    public void SaveSettings()
+    {
+        PlayerPrefs.SetString("controls.player_1.move.up", menuSettingsControlsPlayer1MoveUp.value);
+        PlayerPrefs.SetString("controls.player_1.move.down", menuSettingsControlsPlayer1MoveDown.value);
+        PlayerPrefs.SetString("controls.player_1.move.left", menuSettingsControlsPlayer1MoveLeft.value);
+        PlayerPrefs.SetString("controls.player_1.move.right", menuSettingsControlsPlayer1MoveRight.value);
+        PlayerPrefs.SetString("controls.player_1.ability", menuSettingsControlsPlayer1Ability.value);
+        PlayerPrefs.SetString("controls.player_2.move.up", menuSettingsControlsPlayer2MoveUp.value);
+        PlayerPrefs.SetString("controls.player_2.move.down", menuSettingsControlsPlayer2MoveDown.value);
+        PlayerPrefs.SetString("controls.player_2.move.left", menuSettingsControlsPlayer2MoveLeft.value);
+        PlayerPrefs.SetString("controls.player_2.move.right", menuSettingsControlsPlayer2MoveRight.value);
+        PlayerPrefs.SetString("controls.player_2.ability", menuSettingsControlsPlayer2Ability.value);
+        PlayerPrefs.SetInt("graphics.particles.effects", menuSettingsGraphicsParticlesEffects.value ? 1 : 0);
+        PlayerPrefs.SetInt("graphics.particles.ambient", menuSettingsGraphicsParticlesEffects.value ? 1 : 0);
+    }
+
+    public void LoadSettings()
+    {
+        menuSettingsControlsPlayer1MoveUp.value = PlayerPrefs.GetString("controls.player_1.move.up");
+        menuSettingsControlsPlayer1MoveDown.value = PlayerPrefs.GetString("controls.player_1.move.down");
+        menuSettingsControlsPlayer1MoveLeft.value = PlayerPrefs.GetString("controls.player_1.move.left");
+        menuSettingsControlsPlayer1MoveRight.value = PlayerPrefs.GetString("controls.player_1.move.right");
+        menuSettingsControlsPlayer1Ability.value = PlayerPrefs.GetString("controls.player_1.ability");
+        menuSettingsControlsPlayer2MoveUp.value = PlayerPrefs.GetString("controls.player_2.move.up");
+        menuSettingsControlsPlayer2MoveDown.value = PlayerPrefs.GetString("controls.player_2.move.down");
+        menuSettingsControlsPlayer2MoveLeft.value = PlayerPrefs.GetString("controls.player_2.move.left");
+        menuSettingsControlsPlayer2MoveRight.value = PlayerPrefs.GetString("controls.player_2.move.right");
+        menuSettingsControlsPlayer2Ability.value = PlayerPrefs.GetString("controls.player_2.ability");
+        menuSettingsGraphicsParticlesEffects.value = PlayerPrefs.GetInt("graphics.particles.effects") == 1;
+        menuSettingsGraphicsParticlesAmbient.value = PlayerPrefs.GetInt("graphics.particles.ambient") == 1;
     }
 
     void Update()

@@ -29,7 +29,7 @@ When a player's health hits 0, they will explode (I'm so proud of my explosion e
 	- **Instant:** instantly effects players on contact and then doesn't do anything else until the player leaves and comes back into contact with this obstacle (e.g. -50 health on collision)
 	- **Gradual:** changes player health over time as long as players are in contact (e.g. -50 health per second while in contact)
 
-## Controls
+## Default Controls
 
 ### Player 1
 - **Move:** `🠙` `🠘` `🠛` `🠚`
@@ -44,6 +44,7 @@ When a player's health hits 0, they will explode (I'm so proud of my explosion e
 - **Orange:** player 1
 - **Aqua:** player 2
 - **Gray:** wall
+- **Light Gray:** dynamic (moving) wall
 - **Red:** damage obstacle
 - **Green:** heal obstacle
 - **Yellow:** instant death obstacle (only causes instant death if not full health)

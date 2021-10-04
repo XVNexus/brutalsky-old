@@ -395,10 +395,20 @@ public class PlayerController : MonoBehaviour
         velocityThisFrame = rigidbody.velocity;
     }
 
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        var crushingForce = 0f;
+        foreach (var contact in collision.contacts)
+        {
+            crushingForce += contact.normalImpulse;
+        }
+        Damage(Mathf.Max(crushingForce - 20f, 0f) * 3f * Time.fixedDeltaTime);
+    }
+
     void OnCollisionEnter2D(Collision2D collision)
     {
         // Calculate impact force for use in camera shake effects and damage calculation
-        var impact = collision.relativeVelocity * rigidbody.mass;
+        var impactVector = collision.relativeVelocity * rigidbody.mass * (collision.rigidbody?.mass ?? 1f);
 
         // Use the collision velocities to determine how much to shove the camera and how much to shake the camera
         // If a player collides with a wall, the camera will be shoved, but if two players collide into each other going the same speed, the camera will be shook
@@ -421,11 +431,11 @@ public class PlayerController : MonoBehaviour
             shovePercent = Mathf.Clamp01(combinedSpeed / highestSpeed); // 1.0 = all shove, 0.0 = all shake, 0.5 = half shove half shake, etc.
             shakePercent = 1f - shovePercent;
         }
-        cameraController.Shove(collision.contacts[0].normal * Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * shovePercent);
-        cameraController.Shake(Mathf.Pow(Mathf.Max(impact.magnitude - 20f, 0f) * .05f, 2f) * .2f * shakePercent);
+        cameraController.Shove(collision.contacts[0].normal * Mathf.Pow(Mathf.Max(impactVector.magnitude - 20f, 0f) * .05f, 2f) * shovePercent);
+        cameraController.Shake(Mathf.Pow(Mathf.Max(impactVector.magnitude - 20f, 0f) * .05f, 2f) * .2f * shakePercent);
 
         // Calculate damage based on impact and speed
-        Damage(Mathf.Pow(Mathf.Max(impact.magnitude - 25f, 0f), 1.5f) / Mathf.Max(velocityLastFrame.magnitude, 2f));
+        Damage(Mathf.Pow(Mathf.Max(impactVector.magnitude - 25f, 0f), 1.5f) / Mathf.Max(velocityLastFrame.magnitude, 2f));
 
         // Stop charge ability if it's active
         if (activeAbility is AbilityAttack)

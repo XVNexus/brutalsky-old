@@ -58,7 +58,6 @@ public class InputManager : MonoBehaviour
     void Start()
     {
         UpdateKeybinds();
-        InvokeRepeating("UpdateKeybinds", 1f, 1f);
     }
 
     public bool GetKeyDown(string id)
@@ -142,16 +141,16 @@ public class InputManager : MonoBehaviour
     public void UpdateKeybinds()
     {
         keybinds = new Keybind[] {
-            new Keybind("player_1.move.up", KeyNameToKeyCode(uiController.menuSettingsControlsPlayer1MoveUp.text)),
-            new Keybind("player_1.move.down", KeyNameToKeyCode(uiController.menuSettingsControlsPlayer1MoveDown.text)),
-            new Keybind("player_1.move.left", KeyNameToKeyCode(uiController.menuSettingsControlsPlayer1MoveLeft.text)),
-            new Keybind("player_1.move.right", KeyNameToKeyCode(uiController.menuSettingsControlsPlayer1MoveRight.text)),
-            new Keybind("player_1.ability", KeyNameToKeyCode(uiController.menuSettingsControlsPlayer1Ability.text)),
-            new Keybind("player_2.move.up", KeyNameToKeyCode(uiController.menuSettingsControlsPlayer2MoveUp.text)),
-            new Keybind("player_2.move.down", KeyNameToKeyCode(uiController.menuSettingsControlsPlayer2MoveDown.text)),
-            new Keybind("player_2.move.left", KeyNameToKeyCode(uiController.menuSettingsControlsPlayer2MoveLeft.text)),
-            new Keybind("player_2.move.right", KeyNameToKeyCode(uiController.menuSettingsControlsPlayer2MoveRight.text)),
-            new Keybind("player_2.ability", KeyNameToKeyCode(uiController.menuSettingsControlsPlayer2Ability.text))
+            new Keybind("player_1.move.up", KeyNameToKeyCode(PlayerPrefs.GetString("controls.player_1.move.up"))),
+            new Keybind("player_1.move.down", KeyNameToKeyCode(PlayerPrefs.GetString("controls.player_1.move.down"))),
+            new Keybind("player_1.move.left", KeyNameToKeyCode(PlayerPrefs.GetString("controls.player_1.move.left"))),
+            new Keybind("player_1.move.right", KeyNameToKeyCode(PlayerPrefs.GetString("controls.player_1.move.right"))),
+            new Keybind("player_1.ability", KeyNameToKeyCode(PlayerPrefs.GetString("controls.player_1.ability"))),
+            new Keybind("player_2.move.up", KeyNameToKeyCode(PlayerPrefs.GetString("controls.player_2.move.up"))),
+            new Keybind("player_2.move.down", KeyNameToKeyCode(PlayerPrefs.GetString("controls.player_2.move.down"))),
+            new Keybind("player_2.move.left", KeyNameToKeyCode(PlayerPrefs.GetString("controls.player_2.move.left"))),
+            new Keybind("player_2.move.right", KeyNameToKeyCode(PlayerPrefs.GetString("controls.player_2.move.right"))),
+            new Keybind("player_2.ability", KeyNameToKeyCode(PlayerPrefs.GetString("controls.player_2.ability"))),
         };
         axes = new Axis[]
         {

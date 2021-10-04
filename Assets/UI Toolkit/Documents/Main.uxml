@@ -23,48 +23,52 @@
     </ui:VisualElement>
     <ui:VisualElement name="container-menu-settings" class="container" style="visibility: hidden;">
         <ui:ScrollView class="base panel panel-fullscreen" style="padding-left: 25%; padding-right: 25%;">
+            <ui:VisualElement style="flex-direction: row;">
+                <ui:Button text="Save Changes" display-tooltip-when-elided="true" name="menu-settings-button-save-changes" class="base button button-minor" style="flex-grow: 80; margin-right: 0; border-top-left-radius: 5px; border-bottom-left-radius: 5px;" />
+                <ui:Button text="Discard Changes" display-tooltip-when-elided="true" name="menu-settings-button-discard-changes" class="base button button-minor" style="flex-grow: 20; margin-left: 0; border-top-right-radius: 5px; border-bottom-right-radius: 5px;" />
+            </ui:VisualElement>
             <ui:Foldout text="Controls" name="menu-settings-foldout-controls" value="false" class="base foldout" style="-unity-font-style: bold; height: auto;">
                 <ui:Label text="Player 1" display-tooltip-when-elided="true" class="base label" />
                 <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
                     <ui:Label text="Move Up" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
-                    <ui:TextField picking-mode="Ignore" text="up arrow" name="menu-settings-controls-player-1-move-up" class="base text-field" style="width: 50%; border-top-left-radius: 5px; border-top-right-radius: 5px;" />
+                    <ui:TextField picking-mode="Ignore" text="up arrow" name="menu-settings-controls-player-1-move-up" value="up arrow" class="base text-field" style="width: 50%; border-top-left-radius: 5px; border-top-right-radius: 5px;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
                     <ui:Label text="Move Down" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
-                    <ui:TextField picking-mode="Ignore" text="down arrow" name="menu-settings-controls-player-1-move-down" class="base text-field" style="width: 50%;" />
+                    <ui:TextField picking-mode="Ignore" text="down arrow" name="menu-settings-controls-player-1-move-down" value="down arrow" class="base text-field" style="width: 50%;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
                     <ui:Label text="Move Left" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
-                    <ui:TextField picking-mode="Ignore" text="left arrow" name="menu-settings-controls-player-1-move-left" class="base text-field" style="width: 50%;" />
+                    <ui:TextField picking-mode="Ignore" text="left arrow" name="menu-settings-controls-player-1-move-left" value="left arrow" class="base text-field" style="width: 50%;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
                     <ui:Label text="Move Right" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
-                    <ui:TextField picking-mode="Ignore" text="right arrow" name="menu-settings-controls-player-1-move-right" class="base text-field" style="width: 50%;" />
+                    <ui:TextField picking-mode="Ignore" text="right arrow" name="menu-settings-controls-player-1-move-right" value="right arrow" class="base text-field" style="width: 50%;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
                     <ui:Label text="Ability" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
-                    <ui:TextField picking-mode="Ignore" text="return" name="menu-settings-controls-player-1-ability" class="base text-field" style="width: 50%; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;" />
+                    <ui:TextField picking-mode="Ignore" text="return" name="menu-settings-controls-player-1-ability" value="return" class="base text-field" style="width: 50%; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;" />
                 </ui:VisualElement>
                 <ui:Label text="Player 2" display-tooltip-when-elided="true" class="base label" />
                 <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
                     <ui:Label text="Move Up" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
-                    <ui:TextField picking-mode="Ignore" text="w" name="menu-settings-controls-player-2-move-up" class="base text-field" style="width: 50%; border-top-left-radius: 5px; border-top-right-radius: 5px;" />
+                    <ui:TextField picking-mode="Ignore" text="w" name="menu-settings-controls-player-2-move-up" value="w" class="base text-field" style="width: 50%; border-top-left-radius: 5px; border-top-right-radius: 5px;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
                     <ui:Label text="Move Down" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
-                    <ui:TextField picking-mode="Ignore" text="s" name="menu-settings-controls-player-2-move-down" class="base text-field" style="width: 50%;" />
+                    <ui:TextField picking-mode="Ignore" text="s" name="menu-settings-controls-player-2-move-down" value="s" class="base text-field" style="width: 50%;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
                     <ui:Label text="Move Left" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
-                    <ui:TextField picking-mode="Ignore" text="a" name="menu-settings-controls-player-2-move-left" class="base text-field" style="width: 50%; height: 40px;" />
+                    <ui:TextField picking-mode="Ignore" text="a" name="menu-settings-controls-player-2-move-left" value="a" class="base text-field" style="width: 50%; height: 40px;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
                     <ui:Label text="Move Right" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
-                    <ui:TextField picking-mode="Ignore" text="d" name="menu-settings-controls-player-2-move-right" class="base text-field" style="width: 50%;" />
+                    <ui:TextField picking-mode="Ignore" text="d" name="menu-settings-controls-player-2-move-right" value="d" class="base text-field" style="width: 50%;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row; height: 40px; min-height: 40px;">
                     <ui:Label text="Ability" display-tooltip-when-elided="true" class="base label" style="width: 50%; -unity-text-align: middle-left;" />
-                    <ui:TextField picking-mode="Ignore" text="back quote" name="menu-settings-controls-player-2-ability" class="base text-field" style="width: 50%; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;" />
+                    <ui:TextField picking-mode="Ignore" text="back quote" name="menu-settings-controls-player-2-ability" value="back quote" class="base text-field" style="width: 50%; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;" />
                 </ui:VisualElement>
             </ui:Foldout>
             <ui:Foldout text="Graphics" name="menu-settings-foldout-graphics" value="false" class="base foldout" style="-unity-font-style: bold; height: auto;">
@@ -80,7 +84,7 @@
             </ui:Foldout>
         </ui:ScrollView>
     </ui:VisualElement>
-    <ui:VisualElement name="container-menu-help" class="container">
+    <ui:VisualElement name="container-menu-help" class="container" style="visibility: hidden;">
         <ui:ScrollView class="base panel panel-fullscreen" style="padding-left: 25%; padding-right: 25%;">
             <ui:Label text="Brutalsky" display-tooltip-when-elided="true" class="base label" style="-unity-font-style: bold;" />
             <ui:Label text="A physics-based fighting game with the objective of ramming / baiting / whatever else your opponent until they run out of health and go kaboom!" display-tooltip-when-elided="true" class="base label" style="-unity-text-align: upper-left; height: auto; white-space: normal; -unity-font-style: normal; font-size: 18px;" />
@@ -92,7 +96,7 @@
                     <ui:Label text="Ability" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
                     <ui:Label text="Required Speed" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
                     <ui:Label text="Charge Time" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
-                    <ui:Label text="Cooldown" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
+                    <ui:Label text="Cooldown Time" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
                     <ui:Label text="Ring Color" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 20%; -unity-font-style: bold; white-space: normal;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row;">
@@ -130,6 +134,10 @@
                 <ui:VisualElement style="flex-direction: row;">
                     <ui:Label text="Gray" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 25%; -unity-font-style: bold; white-space: normal; color: rgb(153, 153, 153);" />
                     <ui:Label text="wall" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 75%; -unity-font-style: normal; white-space: normal; color: rgb(204, 204, 204);" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="Light Gray" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 25%; -unity-font-style: bold; white-space: normal; color: rgb(204, 204, 204);" />
+                    <ui:Label text="dynamic (moving) wall" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 75%; -unity-font-style: normal; white-space: normal; color: rgb(229, 229, 229);" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row;">
                     <ui:Label text="Red" display-tooltip-when-elided="true" class="base label" style="height: auto; font-size: 16px; width: 25%; -unity-font-style: bold; white-space: normal; color: rgb(255, 51, 51);" />
