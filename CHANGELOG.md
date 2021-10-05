@@ -167,3 +167,7 @@
 - Added titles to v0.1 - 0.3, v0.5 - 0.7, and v0.10 update entries
 - Edited v0.0, v0.3, v0.7, v0.14, and v0.15 changelog entries
 - Removed notes showing which text was changed in file edits because I don't think anybody cares that much and its cluttering the changelog
+
+## V 0.17.1 &nbsp; `2021-10-05 14:12`
+### Fixed
+- (Hopefully) fixed github URL in the code causing an error
