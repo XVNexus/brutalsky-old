@@ -120,6 +120,19 @@
     padding-bottom: 5px;
 }
 
+.label-header {
+    -unity-font-style: bold;
+    height: auto;
+}
+
+.label-info {
+    height: auto;
+    font-size: 18px;
+    -unity-text-align: upper-left;
+    white-space: normal;
+    -unity-font-style: normal;
+}
+
 .text-field > #unity-text-input {
     background-color: rgba(255, 255, 255, 0.05);
     -unity-font-style: normal;
@@ -134,7 +147,7 @@
     background-color: rgba(255, 255, 255, 0.1);
     font-size: 22px;
     -unity-font-style: bold;
-    color: rgba(255, 170, 0, 255);
+    color: rgb(255, 170, 0);
 }
 
 .foldout {
@@ -142,8 +155,20 @@
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.foldout:hover > Toggle > VisualElement > Label {
+    color: rgb(255, 170, 0);
+}
+
+.foldout:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .foldout > Toggle:focus > VisualElement > Label {
-    color: rgba(255, 170, 0, 255);
+    color: rgb(255, 170, 0);
 }

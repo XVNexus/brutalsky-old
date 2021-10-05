@@ -1,247 +1,5 @@
 using UnityEngine;
 
-public enum AbilityState
-{
-    IDLE,       // Stage 1: ability is not charging or active and is ready to be used
-    CHARGING,   // Stage 2: ability is currently being charged by holding the ability key
-    ACTIVE,     // Stage 3: ability has been charged and has been activated
-    COOLDOWN    // Stage 4: ability has been spent and is inusable until it has finished the cooldown time
-}
-
-[System.Serializable]
-public struct AbilitySettings
-{
-    public float chargeTime;
-    public float activeTime;
-    public float cooldownTime;
-    public Vector2 minMaxSpeed;
-    public Color color;
-
-    public AbilitySettings(float chargeTime, float activeTime, float cooldownTime, Vector2 minMaxSpeed, Color color)
-    {
-        this.chargeTime = chargeTime;
-        this.activeTime = activeTime;
-        this.cooldownTime = cooldownTime;
-        this.minMaxSpeed = minMaxSpeed;
-        this.color = color;
-    }
-}
-
-public abstract class Ability
-{
-    public AbilitySettings Settings { get; set; }
-    public AbilityState State { get; private set; } = AbilityState.IDLE;
-    public float ChargeTimer { get; private set; } = 0f;
-    public float ActiveTimer { get; private set; } = 0f;
-    public float CooldownTimer { get; private set; } = 0f;
-    public float ChargeCompletePercent { get => ChargeTimer / Settings.chargeTime; }
-    public float ActiveCompletePercent { get => (Settings.activeTime - ActiveTimer) / Settings.activeTime; }
-    public float CooldownCompletePercent { get => (Settings.cooldownTime - CooldownTimer) / Settings.cooldownTime; }
-
-    private bool activationQueued = false;
-
-    public Ability(AbilitySettings settings)
-    {
-        Settings = settings;
-    }
-
-    /// <summary>
-    /// Start charging ability.
-    /// </summary>
-    /// <param name="player"></param>
-    public void Initiate(PlayerController player)
-    {
-        if (State == AbilityState.IDLE)
-        {
-            State = AbilityState.CHARGING;
-            OnInitiate(player);
-        }
-    }
-
-    /// <summary>
-    /// Stop charging and activate abililty.
-    /// </summary>
-    /// <param name="player"></param>
-    public void Activate(PlayerController player)
-    {
-        var isPlayerSpeedInRange = IsSpeedInRange(player.rigidbody.velocity.magnitude);
-        if (State == AbilityState.CHARGING && isPlayerSpeedInRange)
-        {
-            State = AbilityState.ACTIVE;
-            ActiveTimer = Settings.activeTime;
-            OnActivate(player, ChargeCompletePercent);
-            ChargeTimer = 0f;
-        }
-        else if (!isPlayerSpeedInRange)
-        {
-            activationQueued = true;
-        }
-    }
-
-    /// <summary>
-    /// Deactivate ability manually even if the active timer hasn't finished yet
-    /// </summary>
-    /// <param name="player"></param>
-    public void Deactivate(PlayerController player)
-    {
-        if (State == AbilityState.ACTIVE)
-        {
-            State = AbilityState.COOLDOWN;
-            CooldownTimer = Settings.cooldownTime;
-            OnDeactivate(player, ActiveCompletePercent);
-            ActiveTimer = 0f;
-        }
-    }
-
-    public bool IsActivatable(float speed)
-    {
-        return State == AbilityState.IDLE && IsSpeedInRange(speed);
-    }
-
-    public bool IsSpeedInRange(float speed)
-    {
-        return speed >= Settings.minMaxSpeed.x && speed <= Settings.minMaxSpeed.y;
-    }
-
-    /// <summary>
-    /// Called once when ability starts charging.
-    /// </summary>
-    /// <param name="player"></param>
-    public virtual void OnInitiate(PlayerController player) { }
-
-    /// <summary>
-    /// Called every frame while ability is charging.
-    /// </summary>
-    /// <param name="player"></param>
-    public virtual void OnCharging(PlayerController player, float chargeCompletePercent) { }
-
-    /// <summary>
-    /// Called once when ability activates.
-    /// </summary>
-    /// <param name="player"></param>
-    public virtual void OnActivate(PlayerController player, float chargePercent) { }
-
-    /// <summary>
-    /// Called every frame while ability is active.
-    /// </summary>
-    /// <param name="player"></param>
-    public virtual void OnActive(PlayerController player, float activeCompletePercent) { }
-
-    /// <summary>
-    /// Called once when ability deactivates.
-    /// </summary>
-    /// <param name="player"></param>
-    public virtual void OnDeactivate(PlayerController player, float activePercent) { }
-
-    /// <summary>
-    /// Called every frame while ability cools down.
-    /// </summary>
-    /// <param name="player"></param>
-    public virtual void OnCooldown(PlayerController player, float cooldownCompletePercent) { }
-
-    /// <summary>
-    /// Called once when ability finishes cooldown and becomes idle.
-    /// </summary>
-    /// <param name="player"></param>
-    public virtual void OnReady(PlayerController player) { }
-
-    /// <summary>
-    /// Call this function from Update() or FixedUpdate() to keep timers updated
-    /// </summary>
-    /// <param name="deltaTime"></param>
-    /// <param name="player"></param>
-    public virtual void UpdateTimers(float deltaTime, PlayerController player)
-    {
-        switch (State)
-        {
-            case AbilityState.IDLE:
-                break;
-            case AbilityState.CHARGING:
-                if (activationQueued && IsSpeedInRange(player.rigidbody.velocity.magnitude))
-                {
-                    Activate(player);
-                    activationQueued = false;
-                }
-                if (ChargeTimer < Settings.chargeTime)
-                {
-                    ChargeTimer = Mathf.Min(ChargeTimer + deltaTime, Settings.chargeTime);
-                    OnCharging(player, ChargeCompletePercent);
-                }
-                else
-                {
-                    OnCharging(player, 1f);
-                }
-                break;
-            case AbilityState.ACTIVE:
-                if (ActiveTimer > 0f)
-                {
-                    ActiveTimer = Mathf.Max(ActiveTimer - deltaTime, 0f);
-                    OnActive(player, ActiveCompletePercent);
-                }
-                else
-                {
-                    Deactivate(player);
-                }
-                break;
-            case AbilityState.COOLDOWN:
-                if (CooldownTimer > 0f)
-                {
-                    CooldownTimer = Mathf.Max(CooldownTimer - deltaTime, 0f);
-                    OnCooldown(player, CooldownCompletePercent);
-
-                }
-                else
-                {
-                    State = AbilityState.IDLE;
-                    OnReady(player);
-                }
-                break;
-        }
-    }
-}
-
-public class AbilityAttack : Ability
-{
-    public Vector2 powerMinMax;
-
-    public AbilityAttack(AbilitySettings settings) : base(settings) { }
-
-    public override void OnInitiate(PlayerController player)
-    {
-        player.chargeUpEffect.Play();
-    }
-
-    public override void OnCharging(PlayerController player, float chargeCompletePercent)
-    {
-        var emissionModule = player.chargeUpEffect.emission;
-        emissionModule.rateOverTime = 50f * ChargeCompletePercent;
-    }
-
-    public override void OnActivate(PlayerController player, float chargeCompletePercent)
-    {
-        var power = Mathf.Lerp(powerMinMax.x, powerMinMax.y, chargeCompletePercent);
-        player.rigidbody.AddForce(player.rigidbody.velocity.normalized * power, ForceMode2D.Impulse);
-        player.chargeUpEffect.Stop();
-        player.trailEffect.Play();
-        player.ghostEffect.Play();
-    }
-
-    public override void OnDeactivate(PlayerController player, float activeCompletePercent)
-    {
-        player.trailEffect.Stop();
-    }
-}
-
-public class AbilityDefend : Ability
-{
-    public AbilityDefend(AbilitySettings settings) : base(settings) { }
-
-    public override void OnActivate(PlayerController player, float chargeCompletePercent)
-    {
-        //TODO: ADD FUNCTIONALITY FOR DEFEND ABILITY
-    }
-}
-
 public class PlayerController : MonoBehaviour
 {
     [Header("Object References")]
@@ -499,6 +257,248 @@ public class PlayerController : MonoBehaviour
             {
                 activeAbility = null;
             }
+        }
+    }
+}
+
+public class AbilityAttack : Ability
+{
+    public Vector2 powerMinMax;
+
+    public AbilityAttack(AbilitySettings settings) : base(settings) { }
+
+    public override void OnInitiate(PlayerController player)
+    {
+        player.chargeUpEffect.Play();
+    }
+
+    public override void OnCharging(PlayerController player, float chargeCompletePercent)
+    {
+        var emissionModule = player.chargeUpEffect.emission;
+        emissionModule.rateOverTime = 50f * ChargeCompletePercent;
+    }
+
+    public override void OnActivate(PlayerController player, float chargeCompletePercent)
+    {
+        var power = Mathf.Lerp(powerMinMax.x, powerMinMax.y, chargeCompletePercent);
+        player.rigidbody.AddForce(player.rigidbody.velocity.normalized * power, ForceMode2D.Impulse);
+        player.chargeUpEffect.Stop();
+        player.trailEffect.Play();
+        player.ghostEffect.Play();
+    }
+
+    public override void OnDeactivate(PlayerController player, float activeCompletePercent)
+    {
+        player.trailEffect.Stop();
+    }
+}
+
+public class AbilityDefend : Ability
+{
+    public AbilityDefend(AbilitySettings settings) : base(settings) { }
+
+    public override void OnActivate(PlayerController player, float chargeCompletePercent)
+    {
+        //TODO: ADD FUNCTIONALITY FOR DEFEND ABILITY
+    }
+}
+
+public enum AbilityState
+{
+    IDLE,       // Stage 1: ability is not charging or active and is ready to be used
+    CHARGING,   // Stage 2: ability is currently being charged by holding the ability key
+    ACTIVE,     // Stage 3: ability has been charged and has been activated
+    COOLDOWN    // Stage 4: ability has been spent and is inusable until it has finished the cooldown time
+}
+
+[System.Serializable]
+public struct AbilitySettings
+{
+    public float chargeTime;
+    public float activeTime;
+    public float cooldownTime;
+    public Vector2 minMaxSpeed;
+    public Color color;
+
+    public AbilitySettings(float chargeTime, float activeTime, float cooldownTime, Vector2 minMaxSpeed, Color color)
+    {
+        this.chargeTime = chargeTime;
+        this.activeTime = activeTime;
+        this.cooldownTime = cooldownTime;
+        this.minMaxSpeed = minMaxSpeed;
+        this.color = color;
+    }
+}
+
+public abstract class Ability
+{
+    public AbilitySettings Settings { get; set; }
+    public AbilityState State { get; private set; } = AbilityState.IDLE;
+    public float ChargeTimer { get; private set; } = 0f;
+    public float ActiveTimer { get; private set; } = 0f;
+    public float CooldownTimer { get; private set; } = 0f;
+    public float ChargeCompletePercent { get => ChargeTimer / Settings.chargeTime; }
+    public float ActiveCompletePercent { get => (Settings.activeTime - ActiveTimer) / Settings.activeTime; }
+    public float CooldownCompletePercent { get => (Settings.cooldownTime - CooldownTimer) / Settings.cooldownTime; }
+
+    private bool activationQueued = false;
+
+    public Ability(AbilitySettings settings)
+    {
+        Settings = settings;
+    }
+
+    /// <summary>
+    /// Start charging ability.
+    /// </summary>
+    /// <param name="player"></param>
+    public void Initiate(PlayerController player)
+    {
+        if (State == AbilityState.IDLE)
+        {
+            State = AbilityState.CHARGING;
+            OnInitiate(player);
+        }
+    }
+
+    /// <summary>
+    /// Stop charging and activate abililty.
+    /// </summary>
+    /// <param name="player"></param>
+    public void Activate(PlayerController player)
+    {
+        var isPlayerSpeedInRange = IsSpeedInRange(player.rigidbody.velocity.magnitude);
+        if (State == AbilityState.CHARGING && isPlayerSpeedInRange)
+        {
+            State = AbilityState.ACTIVE;
+            ActiveTimer = Settings.activeTime;
+            OnActivate(player, ChargeCompletePercent);
+            ChargeTimer = 0f;
+        }
+        else if (!isPlayerSpeedInRange)
+        {
+            activationQueued = true;
+        }
+    }
+
+    /// <summary>
+    /// Deactivate ability manually even if the active timer hasn't finished yet
+    /// </summary>
+    /// <param name="player"></param>
+    public void Deactivate(PlayerController player)
+    {
+        if (State == AbilityState.ACTIVE)
+        {
+            State = AbilityState.COOLDOWN;
+            CooldownTimer = Settings.cooldownTime;
+            OnDeactivate(player, ActiveCompletePercent);
+            ActiveTimer = 0f;
+        }
+    }
+
+    public bool IsActivatable(float speed)
+    {
+        return State == AbilityState.IDLE && IsSpeedInRange(speed);
+    }
+
+    public bool IsSpeedInRange(float speed)
+    {
+        return speed >= Settings.minMaxSpeed.x && speed <= Settings.minMaxSpeed.y;
+    }
+
+    /// <summary>
+    /// Called once when ability starts charging.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnInitiate(PlayerController player) { }
+
+    /// <summary>
+    /// Called every frame while ability is charging.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnCharging(PlayerController player, float chargeCompletePercent) { }
+
+    /// <summary>
+    /// Called once when ability activates.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnActivate(PlayerController player, float chargePercent) { }
+
+    /// <summary>
+    /// Called every frame while ability is active.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnActive(PlayerController player, float activeCompletePercent) { }
+
+    /// <summary>
+    /// Called once when ability deactivates.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnDeactivate(PlayerController player, float activePercent) { }
+
+    /// <summary>
+    /// Called every frame while ability cools down.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnCooldown(PlayerController player, float cooldownCompletePercent) { }
+
+    /// <summary>
+    /// Called once when ability finishes cooldown and becomes idle.
+    /// </summary>
+    /// <param name="player"></param>
+    public virtual void OnReady(PlayerController player) { }
+
+    /// <summary>
+    /// Call this function from Update() or FixedUpdate() to keep timers updated
+    /// </summary>
+    /// <param name="deltaTime"></param>
+    /// <param name="player"></param>
+    public virtual void UpdateTimers(float deltaTime, PlayerController player)
+    {
+        switch (State)
+        {
+            case AbilityState.IDLE:
+                break;
+            case AbilityState.CHARGING:
+                if (activationQueued && IsSpeedInRange(player.rigidbody.velocity.magnitude))
+                {
+                    Activate(player);
+                    activationQueued = false;
+                }
+                if (ChargeTimer < Settings.chargeTime)
+                {
+                    ChargeTimer = Mathf.Min(ChargeTimer + deltaTime, Settings.chargeTime);
+                    OnCharging(player, ChargeCompletePercent);
+                }
+                else
+                {
+                    OnCharging(player, 1f);
+                }
+                break;
+            case AbilityState.ACTIVE:
+                if (ActiveTimer > 0f)
+                {
+                    ActiveTimer = Mathf.Max(ActiveTimer - deltaTime, 0f);
+                    OnActive(player, ActiveCompletePercent);
+                }
+                else
+                {
+                    Deactivate(player);
+                }
+                break;
+            case AbilityState.COOLDOWN:
+                if (CooldownTimer > 0f)
+                {
+                    CooldownTimer = Mathf.Max(CooldownTimer - deltaTime, 0f);
+                    OnCooldown(player, CooldownCompletePercent);
+
+                }
+                else
+                {
+                    State = AbilityState.IDLE;
+                    OnReady(player);
+                }
+                break;
         }
     }
 }

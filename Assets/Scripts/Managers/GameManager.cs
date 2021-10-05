@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
                 }
             }
             uiController.ShowWinText(winningPlayerNum, winningPlayerColor);
-            Time.timeScale = 0.2f;
+            Time.timeScale = .2f;
             gameOver = true;
         }
     }
@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
     public void SetTimeScale(float value)
     {
         Time.timeScale = value;
-        Time.fixedDeltaTime = 0.02f * value;
+        Time.fixedDeltaTime = .02f * value;
     }
 
     public void ChangePlayerHealth(int playerNum, int delta)

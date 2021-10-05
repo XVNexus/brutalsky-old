@@ -4,25 +4,26 @@
         <ui:Label text="Player 1 wins!" display-tooltip-when-elided="true" name="message-label" class="base" style="font-size: 60px;" />
     </ui:VisualElement>
     <ui:VisualElement name="container-menu" class="container" style="visibility: hidden;">
-        <ui:VisualElement class="base panel panel-standalone" style="width: 25%; height: 70%;">
+        <ui:VisualElement name="panel-menu" class="base panel panel-standalone" style="width: 25%; height: 70%;">
             <ui:Button text="Continue" display-tooltip-when-elided="true" name="menu-button-continue" class="base button button-major button-single" style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px;" />
             <ui:Button text="Level Selector" display-tooltip-when-elided="true" name="menu-button-level-selector" class="base button button-minor button-top" style="border-top-left-radius: 5px; border-top-right-radius: 5px; margin-bottom: 0; color: rgb(51, 255, 51);" />
             <ui:VisualElement style="flex-direction: row;">
-                <ui:Button text="&lt; Prev" display-tooltip-when-elided="true" name="menu-button-prev" class="base button button-minor" style="flex-grow: 1; border-bottom-left-radius: 5px; margin-top: 0; margin-right: 0; color: rgb(153, 255, 153);" />
-                <ui:Button text="Restart" display-tooltip-when-elided="true" name="menu-button-restart" class="base button button-minor" style="flex-grow: 1; margin-left: 0; margin-right: 0; margin-top: 0; color: rgb(153, 255, 153);" />
-                <ui:Button text="Next &gt;" display-tooltip-when-elided="true" name="menu-button-next" class="base button button-minor" style="flex-grow: 1; margin-top: 0; margin-left: 0; color: rgb(153, 255, 153); border-bottom-right-radius: 5px;" />
+                <ui:Button text="&lt; Prev" display-tooltip-when-elided="true" name="menu-button-prev" class="base button button-minor" style="flex-grow: 1; border-bottom-left-radius: 5px; margin-top: 0; margin-right: 0; color: rgb(51, 255, 51);" />
+                <ui:Button text="Restart" display-tooltip-when-elided="true" name="menu-button-restart" class="base button button-minor" style="flex-grow: 1; margin-left: 0; margin-right: 0; margin-top: 0; color: rgb(51, 255, 51);" />
+                <ui:Button text="Next &gt;" display-tooltip-when-elided="true" name="menu-button-next" class="base button button-minor" style="flex-grow: 1; margin-top: 0; margin-left: 0; color: rgb(51, 255, 51); border-bottom-right-radius: 5px;" />
             </ui:VisualElement>
             <ui:Button text="Settings" display-tooltip-when-elided="true" name="menu-button-settings" class="base button button-minor" style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; color: rgb(51, 255, 255);" />
-            <ui:Button text="Help" display-tooltip-when-elided="true" name="menu-button-help" class="base button button-minor" style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; color: rgb(51, 153, 255);" />
+            <ui:Button text="Help" display-tooltip-when-elided="true" name="menu-button-help" class="base button button-minor" style="border-top-left-radius: 5px; border-top-right-radius: 5px; color: rgb(51, 153, 255); margin-bottom: 0;" />
+            <ui:Button text="Changelog" display-tooltip-when-elided="true" name="menu-button-changelog" class="base button button-minor" style="border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; color: rgb(51, 153, 255); margin-top: 0;" />
             <ui:VisualElement style="flex-grow: 1;" />
             <ui:VisualElement style="flex-direction: row;">
-                <ui:Button text="Main Menu" display-tooltip-when-elided="true" name="menu-button-main-menu" class="base button button-minor" style="flex-grow: 1; border-top-left-radius: 5px; border-bottom-left-radius: 5px; margin-right: 0; color: rgb(255, 153, 153);" />
+                <ui:Button text="Main Menu" display-tooltip-when-elided="true" name="menu-button-main-menu" class="base button button-minor" style="flex-grow: 1; border-top-left-radius: 5px; border-bottom-left-radius: 5px; margin-right: 0; color: rgb(255, 51, 51);" />
                 <ui:Button text="Exit" display-tooltip-when-elided="true" name="menu-button-exit" class="base button button-minor" style="flex-grow: 1; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: 0; color: rgb(255, 51, 51);" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement name="container-menu-settings" class="container" style="visibility: hidden;">
-        <ui:ScrollView class="base panel panel-fullscreen" style="padding-left: 25%; padding-right: 25%;">
+        <ui:ScrollView name="panel-menu-settings" class="base panel panel-fullscreen" style="padding-left: 25%; padding-right: 25%;">
             <ui:VisualElement style="flex-direction: row;">
                 <ui:Button text="Save Changes" display-tooltip-when-elided="true" name="menu-settings-button-save-changes" class="base button button-minor" style="flex-grow: 80; margin-right: 0; border-top-left-radius: 5px; border-bottom-left-radius: 5px;" />
                 <ui:Button text="Discard Changes" display-tooltip-when-elided="true" name="menu-settings-button-discard-changes" class="base button button-minor" style="flex-grow: 20; margin-left: 0; border-top-right-radius: 5px; border-bottom-right-radius: 5px;" />
@@ -85,7 +86,7 @@
         </ui:ScrollView>
     </ui:VisualElement>
     <ui:VisualElement name="container-menu-help" class="container" style="visibility: hidden;">
-        <ui:ScrollView class="base panel panel-fullscreen" style="padding-left: 25%; padding-right: 25%;">
+        <ui:ScrollView name="panel-menu-help" class="base panel panel-fullscreen" style="padding-left: 25%; padding-right: 25%;">
             <ui:Label text="Brutalsky" display-tooltip-when-elided="true" class="base label" style="-unity-font-style: bold;" />
             <ui:Label text="A physics-based fighting game with the objective of ramming / baiting / whatever else your opponent until they run out of health and go kaboom!" display-tooltip-when-elided="true" class="base label" style="-unity-text-align: upper-left; height: auto; white-space: normal; -unity-font-style: normal; font-size: 18px;" />
             <ui:Foldout text="Ability Key" value="false" class="base foldout" style="-unity-font-style: bold; height: auto;">
@@ -179,6 +180,12 @@
                     <ui:Label display-tooltip-when-elided="true" text="`" class="base label" style="height: 30px; font-size: 16px; width: 16%; -unity-font-style: normal; white-space: normal;" />
                 </ui:VisualElement>
             </ui:Foldout>
+        </ui:ScrollView>
+    </ui:VisualElement>
+    <ui:VisualElement name="container-menu-changelog" class="container" style="visibility: hidden;">
+        <ui:ScrollView name="panel-menu-changelog" class="base panel panel-fullscreen" style="padding-left: 25%; padding-right: 25%;">
+            <ui:Label text="Changelog" display-tooltip-when-elided="true" class="base label label-header" />
+            <ui:Label text="Here you can see all the changes made in updates." display-tooltip-when-elided="true" class="base label label-info" />
         </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>

@@ -2,52 +2,6 @@ using System;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-public class Keybind
-{
-    public string Id { get; private set; }
-    public KeyCode Key { get; set; }
-
-    public Keybind(string id, KeyCode key)
-    {
-        Id = id;
-        Key = key;
-    }
-
-    public bool GetKeyDown()
-    {
-        return Input.GetKeyDown(Key);
-    }
-
-    public bool GetKeyUp()
-    {
-        return Input.GetKeyUp(Key);
-    }
-
-    public bool GetKey()
-    {
-        return Input.GetKey(Key);
-    }
-}
-
-public class Axis
-{
-    public string Id { get; private set; }
-    public Keybind Negative { get; set; }
-    public Keybind Positive { get; set; }
-
-    public Axis(string id, Keybind positive, Keybind negative)
-    {
-        Id = id;
-        Positive = positive;
-        Negative = negative;
-    }
-
-    public float GetValue()
-    {
-        return (Negative.GetKey() ? -1 : 0) + (Positive.GetKey() ? 1 : 0);
-    }
-}
-
 public class InputManager : MonoBehaviour
 {
     [Header("Object References")]
@@ -164,5 +118,51 @@ public class InputManager : MonoBehaviour
     private KeyCode KeyNameToKeyCode(string name)
     {
         return (KeyCode)Enum.Parse(typeof(KeyCode), Regex.Replace(name, @"[^a-z0-9]", ""), true);
+    }
+}
+
+public class Keybind
+{
+    public string Id { get; private set; }
+    public KeyCode Key { get; set; }
+
+    public Keybind(string id, KeyCode key)
+    {
+        Id = id;
+        Key = key;
+    }
+
+    public bool GetKeyDown()
+    {
+        return Input.GetKeyDown(Key);
+    }
+
+    public bool GetKeyUp()
+    {
+        return Input.GetKeyUp(Key);
+    }
+
+    public bool GetKey()
+    {
+        return Input.GetKey(Key);
+    }
+}
+
+public class Axis
+{
+    public string Id { get; private set; }
+    public Keybind Negative { get; set; }
+    public Keybind Positive { get; set; }
+
+    public Axis(string id, Keybind positive, Keybind negative)
+    {
+        Id = id;
+        Positive = positive;
+        Negative = negative;
+    }
+
+    public float GetValue()
+    {
+        return (Negative.GetKey() ? -1 : 0) + (Positive.GetKey() ? 1 : 0);
     }
 }
