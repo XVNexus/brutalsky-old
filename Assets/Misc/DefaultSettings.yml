@@ -1,0 +1,67 @@
+gameplay:
+    player_defaults:
+        max_health: 100
+        max_armor: 100
+        starting_health: 100
+        starting_armor: 0
+        movement_speed: 20
+        strenth: 1
+        damage_multiplier: 0
+        heal_multiplier: 0
+    abilities:
+        charge:
+            enabled: true
+            required_speed: {m: 5, x: 30}
+            power: {m: 25, x: 45}
+            charge_time: 3
+            active_time: 2
+            cooldown_time: 2
+            color: {h: 180, s: 80, v: 100, a: 20}
+        shield:
+            enabled: true
+            required_speed: {m: 0, x: 5}
+            charge_time: 0
+            active_time: 5
+            cooldown_time: 10
+            color: {h: 60, s: 80, v: 100, a: 20}
+controls:
+    general:
+        pause: Escape
+        prev: LeftControl+Less
+        restart: LeftControl+R LeftControl+Slash
+        next: LeftControl+Greater
+    players:
+        offline:
+            -
+                move: [UpArrow, LeftArrow, DownArrow, RightArrow]
+                ability: Quote
+            -
+                move: [W, A, S, D]
+                ability: BackQuote
+        online:
+            move: [W UpArrow, A LeftArrow, S DownArrow, D RightArrow]
+            ability: Enter Space BackQuote
+graphics:
+    general:
+        fps_cap: 120
+        lighting: true
+        post_processing: true
+        camera_shake: {e: true, i: 1}
+    particles:
+        effects: {e: true, i: 1}
+        ambient: {e: true, i: 1}
+players:
+    offline:
+        -
+            enabled: true
+            name: 'Player 1'
+            color: {h: 30, s: 80, v: 100}
+            type: human
+        -
+            enabled: true
+            name: 'Player 2'
+            color: {h: 210, s: 80, v: 100}
+            type: human
+    online:
+        name: 'Anonymous'
+        color: {h: 0, s: 0, v: 100}

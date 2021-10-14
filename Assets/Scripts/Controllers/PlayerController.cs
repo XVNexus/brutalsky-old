@@ -34,10 +34,8 @@ public class PlayerController : MonoBehaviour
     // Used when adding/subtracting fractional values from health to store the non-integer part of the delta for later
     private float healthFractionalBuffer = 0f;
 
-    [HideInInspector]
-    public Vector2 velocityThisFrame = new Vector2();
-    [HideInInspector]
-    public Vector2 velocityLastFrame = new Vector2();
+    public Vector2 VelocityThisFrame { get; private set; } = new Vector2();
+    public Vector2 VelocityLastFrame { get; private set; } = new Vector2();
 
     void Start()
     {
@@ -116,6 +114,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         UpdateUI();
+
         if (inputManager.GetKeyDown($"player_{playerNum}.ability"))
         {
             for (var i = 0; i < abilities.Length && activeAbility == null; i++)
@@ -149,8 +148,8 @@ public class PlayerController : MonoBehaviour
         rigidbody.AddForce(moveVector * movePower);
 
         // Update stored velocity
-        velocityLastFrame = velocityThisFrame;
-        velocityThisFrame = rigidbody.velocity;
+        VelocityLastFrame = VelocityThisFrame;
+        VelocityThisFrame = rigidbody.velocity;
     }
 
     void OnCollisionStay2D(Collision2D collision)
@@ -170,12 +169,12 @@ public class PlayerController : MonoBehaviour
 
         // Use the collision velocities to determine how much to shove the camera and how much to shake the camera
         // If a player collides with a wall, the camera will be shoved, but if two players collide into each other going the same speed, the camera will be shook
-        var thisVelocity = velocityLastFrame;
+        var thisVelocity = VelocityLastFrame;
         var otherVelocity = new Vector2();
         var otherGameObject = collision.collider.gameObject;
         if (otherGameObject.CompareTag("Player"))
         {
-            otherVelocity = otherGameObject.GetComponent<PlayerController>().velocityLastFrame;
+            otherVelocity = otherGameObject.GetComponent<PlayerController>().VelocityLastFrame;
         }
         var combinedVelocity = thisVelocity + otherVelocity;
         var highestSpeed = Mathf.Max(thisVelocity.magnitude, otherVelocity.magnitude);
@@ -193,7 +192,7 @@ public class PlayerController : MonoBehaviour
         cameraController.Shake(Mathf.Pow(Mathf.Max(impactVector.magnitude - 20f, 0f) * .05f, 2f) * .2f * shakePercent);
 
         // Calculate damage based on impact and speed
-        Damage(Mathf.Pow(Mathf.Max(impactVector.magnitude - 25f, 0f), 1.5f) / Mathf.Max(velocityLastFrame.magnitude, 2f));
+        Damage(Mathf.Pow(Mathf.Max(impactVector.magnitude - 25f, 0f), 1.5f) / Mathf.Max(VelocityLastFrame.magnitude, 2f));
 
         // Stop charge ability if it's active
         if (activeAbility is AbilityAttack)

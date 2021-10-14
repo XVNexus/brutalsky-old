@@ -11,6 +11,34 @@ public class InputManager : MonoBehaviour
 
     void Start()
     {
+        // Check if settings have been saved before
+        bool settingsInitialized;
+        if (!PlayerPrefs.HasKey("INIT"))
+        {
+            settingsInitialized = false;
+        }
+        else
+        {
+            settingsInitialized = PlayerPrefs.GetInt("INIT") == 1;
+        }
+        // If settings have not been saved before, initialize them to default values
+        if (!settingsInitialized)
+        {
+            PlayerPrefs.SetString("controls.player_1.move.up", "up arrow");
+            PlayerPrefs.SetString("controls.player_1.move.down", "down arrow");
+            PlayerPrefs.SetString("controls.player_1.move.left", "left arrow");
+            PlayerPrefs.SetString("controls.player_1.move.right", "right arrow");
+            PlayerPrefs.SetString("controls.player_1.ability", "return");
+            PlayerPrefs.SetString("controls.player_2.move.up", "w");
+            PlayerPrefs.SetString("controls.player_2.move.down", "s");
+            PlayerPrefs.SetString("controls.player_2.move.left", "a");
+            PlayerPrefs.SetString("controls.player_2.move.right", "d");
+            PlayerPrefs.SetString("controls.player_2.ability", "back quote");
+            PlayerPrefs.SetInt("graphics.quality.post_processing", 1);
+            PlayerPrefs.SetInt("graphics.particles.effects", 1);
+            PlayerPrefs.SetInt("graphics.particles.ambient", 1);
+            PlayerPrefs.SetInt("INIT", 1);
+        }
         UpdateKeybinds();
     }
 

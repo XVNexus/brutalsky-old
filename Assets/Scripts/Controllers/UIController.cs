@@ -1,10 +1,387 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UIElements;
+
+public class UIController : MonoBehaviour
+{
+    [Header("Object References")]
+    public GameManager gameManager;
+    public InputManager inputManager;
+
+    // FPS group
+    public VisualElement containerFps;
+    public Label fpsLabel;
+
+    // Message group
+    public VisualElement containerMessage;
+    public Label messageLabel;
+
+    // Menu group
+    public VisualElement containerMenu;
+    public VisualElement panelMenu;
+    public Button menuButtonContinue;
+    public Button menuButtonLevelSelector;
+    public Button menuButtonPrev;
+    public Button menuButtonRestart;
+    public Button menuButtonNext;
+    public Button menuButtonSettings;
+    public Button menuButtonChangelog;
+    public Button menuButtonHelp;
+    public Button menuButtonMainMenu;
+    public Button menuButtonExit;
+
+    // Settings group
+    public VisualElement containerMenuSettings;
+    public VisualElement panelMenuSettings;
+    public Button menuSettingsButtonSaveChanges;
+    public Button menuSettingsButtonDiscardChanges;
+    public Foldout menuSettingsFoldoutControls;
+    public TextField menuSettingsControlsPlayer1MoveUp;
+    public TextField menuSettingsControlsPlayer1MoveDown;
+    public TextField menuSettingsControlsPlayer1MoveLeft;
+    public TextField menuSettingsControlsPlayer1MoveRight;
+    public TextField menuSettingsControlsPlayer1Ability;
+    public TextField menuSettingsControlsPlayer2MoveUp;
+    public TextField menuSettingsControlsPlayer2MoveDown;
+    public TextField menuSettingsControlsPlayer2MoveLeft;
+    public TextField menuSettingsControlsPlayer2MoveRight;
+    public TextField menuSettingsControlsPlayer2Ability;
+    public Foldout menuSettingsFoldoutGraphics;
+    public Toggle menuSettingsGraphicsParticlesEffects;
+    public Toggle menuSettingsGraphicsParticlesAmbient;
+
+    // Help group
+    public VisualElement containerMenuHelp;
+    public VisualElement panelMenuHelp;
+
+    // Changelog group
+    public VisualElement containerMenuChangelog;
+    public VisualElement panelMenuChangelog;
+
+    private UIManager uiManager;
+    private bool loadedChangelog = false;
+
+    void Start()
+    {
+        var root = GetComponent<UIDocument>().rootVisualElement;
+
+        // FPS group
+        containerFps = root.Q<VisualElement>("container-fps");
+        fpsLabel = containerFps.Q<Label>("fps-label");
+
+        // Message group
+        containerMessage = root.Q<VisualElement>("container-message");
+        messageLabel = containerMessage.Q<Label>("message-label");
+
+        // Menu group
+        containerMenu = root.Q<VisualElement>("container-menu");
+        panelMenu = containerMenu.Q<VisualElement>("panel-menu");
+        menuButtonContinue = panelMenu.Q<Button>("menu-button-continue");
+        menuButtonLevelSelector = panelMenu.Q<Button>("menu-button-level-selector");
+        menuButtonPrev = panelMenu.Q<Button>("menu-button-prev");
+        menuButtonRestart = panelMenu.Q<Button>("menu-button-restart");
+        menuButtonNext = panelMenu.Q<Button>("menu-button-next");
+        menuButtonSettings = panelMenu.Q<Button>("menu-button-settings");
+        menuButtonChangelog = panelMenu.Q<Button>("menu-button-changelog");
+        menuButtonHelp = panelMenu.Q<Button>("menu-button-help");
+        menuButtonMainMenu = panelMenu.Q<Button>("menu-button-main-menu");
+        menuButtonExit = panelMenu.Q<Button>("menu-button-exit");
+
+        menuButtonContinue.clicked += ActMenuContinue;
+        menuButtonLevelSelector.clicked += ActMenuLevelSelector;
+        menuButtonPrev.clicked += ActMenuPrev;
+        menuButtonRestart.clicked += ActMenuRestart;
+        menuButtonNext.clicked += ActMenuNext;
+        menuButtonSettings.clicked += ActMenuSettings;
+        menuButtonChangelog.clicked += ActMenuChangelog;
+        menuButtonHelp.clicked += ActMenuHelp;
+        menuButtonMainMenu.clicked += ActMenuMainMenu;
+        menuButtonExit.clicked += ActMenuExit;
+
+        // Settings group
+        containerMenuSettings = root.Q<VisualElement>("container-menu-settings");
+        panelMenuSettings = containerMenuSettings.Q<VisualElement>("panel-menu-settings");
+        menuSettingsButtonSaveChanges = panelMenuSettings.Q<Button>("menu-settings-button-save-changes");
+        menuSettingsButtonDiscardChanges = panelMenuSettings.Q<Button>("menu-settings-button-discard-changes");
+        menuSettingsFoldoutControls = panelMenuSettings.Q<Foldout>("menu-settings-foldout-controls");
+        menuSettingsControlsPlayer1MoveUp = panelMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-up");
+        menuSettingsControlsPlayer1MoveDown = panelMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-down");
+        menuSettingsControlsPlayer1MoveLeft = panelMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-left");
+        menuSettingsControlsPlayer1MoveRight = panelMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-right");
+        menuSettingsControlsPlayer1Ability = panelMenuSettings.Q<TextField>("menu-settings-controls-player-1-ability");
+        menuSettingsControlsPlayer2MoveUp = panelMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-up");
+        menuSettingsControlsPlayer2MoveDown = panelMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-down");
+        menuSettingsControlsPlayer2MoveLeft = panelMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-left");
+        menuSettingsControlsPlayer2MoveRight = panelMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-right");
+        menuSettingsControlsPlayer2Ability = panelMenuSettings.Q<TextField>("menu-settings-controls-player-2-ability");
+        menuSettingsFoldoutGraphics = panelMenuSettings.Q<Foldout>("menu-settings-foldout-graphics");
+        menuSettingsGraphicsParticlesEffects = panelMenuSettings.Q<Toggle>("menu-settings-graphics-particles-effects");
+        menuSettingsGraphicsParticlesAmbient = panelMenuSettings.Q<Toggle>("menu-settings-graphics-particles-ambient");
+
+        menuSettingsButtonSaveChanges.clicked += ActMenuSettingsSaveChanges;
+        menuSettingsButtonDiscardChanges.clicked += ActMenuSettingsDiscardChanges;
+
+        // Help group
+        containerMenuHelp = root.Q<VisualElement>("container-menu-help");
+        panelMenuHelp = containerMenuHelp.Q<ScrollView>("panel-menu-help");
+
+        // Changelog group
+        containerMenuChangelog = root.Q<VisualElement>("container-menu-changelog");
+        panelMenuChangelog = containerMenuChangelog.Q<ScrollView>("panel-menu-changelog");
+
+
+        // Set up UI system
+        containerMessage.visible = false;
+        var uiWindowMenu = new UIWindow("menu", 0, containerMenu);
+        var uiWindowMenuSettings = new UIWindow("menu.settings", 1, containerMenuSettings, uiWindowMenu);
+        var uiWindowMenuHelp = new UIWindow("menu.help", 1, containerMenuHelp, uiWindowMenu);
+        var uiWindowMenuChangelog = new UIWindow("menu.changelog", 1, containerMenuChangelog, uiWindowMenu);
+        uiManager = new UIManager(new UIWindow[] { uiWindowMenu, uiWindowMenuSettings, uiWindowMenuHelp, uiWindowMenuChangelog });
+
+        LoadSettings();
+    }
+
+    private void ActMenuContinue()
+    {
+        uiManager.CloseWindow("menu");
+    }
+
+    private void ActMenuLevelSelector()
+    {
+        Debug.LogWarning("menu:@level-selector");
+    }
+
+    private void ActMenuPrev()
+    {
+        Debug.LogWarning("menu:@previous");
+    }
+
+    private void ActMenuRestart()
+    {
+        gameManager.ReloadGame();
+    }
+
+    private void ActMenuNext()
+    {
+        Debug.LogWarning("menu:@next");
+    }
+
+    private void ActMenuSettings()
+    {
+        uiManager.OpenWindow("menu.settings");
+    }
+
+    private void ActMenuHelp()
+    {
+        uiManager.OpenWindow("menu.help");
+    }
+
+    private void ActMenuChangelog()
+    {
+        uiManager.OpenWindow("menu.changelog");
+        if (!loadedChangelog)
+        {
+            LoadChangelog();
+            loadedChangelog = true;
+        }
+    }
+
+    private void ActMenuMainMenu()
+    {
+        Debug.LogWarning("menu:@main-menu");
+    }
+
+    private void ActMenuExit()
+    {
+        Application.Quit();
+    }
+
+    private void ActMenuSettingsSaveChanges()
+    {
+        SaveSettings();
+        inputManager.UpdateKeybinds();
+    }
+
+    private void ActMenuSettingsDiscardChanges()
+    {
+        LoadSettings();
+    }
+
+    public void SetFpsLabel(int fps)
+    {
+        fpsLabel.text = $"FPS: {fps}";
+    }
+
+    public void ShowWinText(int playerNum, Color playerColor)
+    {
+        containerMessage.visible = true;
+        messageLabel.text = $"Player {playerNum} wins!";
+        messageLabel.style.color = playerColor;
+    }
+
+    public void SaveSettings()
+    {
+        PlayerPrefs.SetString("controls.player_1.move.up", menuSettingsControlsPlayer1MoveUp.value);
+        PlayerPrefs.SetString("controls.player_1.move.down", menuSettingsControlsPlayer1MoveDown.value);
+        PlayerPrefs.SetString("controls.player_1.move.left", menuSettingsControlsPlayer1MoveLeft.value);
+        PlayerPrefs.SetString("controls.player_1.move.right", menuSettingsControlsPlayer1MoveRight.value);
+        PlayerPrefs.SetString("controls.player_1.ability", menuSettingsControlsPlayer1Ability.value);
+        PlayerPrefs.SetString("controls.player_2.move.up", menuSettingsControlsPlayer2MoveUp.value);
+        PlayerPrefs.SetString("controls.player_2.move.down", menuSettingsControlsPlayer2MoveDown.value);
+        PlayerPrefs.SetString("controls.player_2.move.left", menuSettingsControlsPlayer2MoveLeft.value);
+        PlayerPrefs.SetString("controls.player_2.move.right", menuSettingsControlsPlayer2MoveRight.value);
+        PlayerPrefs.SetString("controls.player_2.ability", menuSettingsControlsPlayer2Ability.value);
+        PlayerPrefs.SetInt("graphics.particles.effects", menuSettingsGraphicsParticlesEffects.value ? 1 : 0);
+        PlayerPrefs.SetInt("graphics.particles.ambient", menuSettingsGraphicsParticlesEffects.value ? 1 : 0);
+    }
+
+    public void LoadSettings()
+    {
+        menuSettingsControlsPlayer1MoveUp.value = PlayerPrefs.GetString("controls.player_1.move.up");
+        menuSettingsControlsPlayer1MoveDown.value = PlayerPrefs.GetString("controls.player_1.move.down");
+        menuSettingsControlsPlayer1MoveLeft.value = PlayerPrefs.GetString("controls.player_1.move.left");
+        menuSettingsControlsPlayer1MoveRight.value = PlayerPrefs.GetString("controls.player_1.move.right");
+        menuSettingsControlsPlayer1Ability.value = PlayerPrefs.GetString("controls.player_1.ability");
+        menuSettingsControlsPlayer2MoveUp.value = PlayerPrefs.GetString("controls.player_2.move.up");
+        menuSettingsControlsPlayer2MoveDown.value = PlayerPrefs.GetString("controls.player_2.move.down");
+        menuSettingsControlsPlayer2MoveLeft.value = PlayerPrefs.GetString("controls.player_2.move.left");
+        menuSettingsControlsPlayer2MoveRight.value = PlayerPrefs.GetString("controls.player_2.move.right");
+        menuSettingsControlsPlayer2Ability.value = PlayerPrefs.GetString("controls.player_2.ability");
+        menuSettingsGraphicsParticlesEffects.value = PlayerPrefs.GetInt("graphics.particles.effects") == 1;
+        menuSettingsGraphicsParticlesAmbient.value = PlayerPrefs.GetInt("graphics.particles.ambient") == 1;
+    }
+
+    public void LoadChangelog()
+    {
+        // Load CHANGELOG.mdfile from github url
+        var changelogFileUrl = "https://raw.githubusercontent.com/XVNexus/brutalsky/main/CHANGELOG.md";
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue
+        {
+            NoCache = true
+        };
+        var changelogFile = "";
+        using (HttpResponseMessage httpResponse = httpClient.GetAsync(changelogFileUrl).Result)
+        {
+            var content = httpResponse.Content;
+            changelogFile = content.ReadAsStringAsync().Result;
+        }
+
+        // Parse changelog file into a tree structure
+        var changelog = Changelog.ParseMarkdown(changelogFile);
+
+        // Generate changelog UI from tree
+        foreach (var version in changelog.Versions)
+        {
+            var uiFoldout = new Foldout();
+            uiFoldout.AddToClassList("base");
+            uiFoldout.AddToClassList("foldout");
+            uiFoldout.style.height = StyleKeyword.Auto;
+            uiFoldout.style.unityFontStyleAndWeight = FontStyle.Bold;
+
+            var versionTitle = $"V {version.Major}.{version.Minor}";
+            versionTitle += version.IsPatch ? $".{version.Patch}" : "";
+            versionTitle += version.HasName ? $" // {version.Name}" : "";
+            uiFoldout.text = versionTitle;
+            uiFoldout.style.unityFontStyleAndWeight = !version.IsPatch ? FontStyle.Bold : FontStyle.BoldAndItalic;
+
+            foreach (var section in version.Sections)
+            {
+                var changePrefix = "";
+                var colorMajor = new Color();
+                var colorMinor = new Color();
+                switch (section.Type)
+                {
+                    case ChangelogSectionType.Added:
+                        changePrefix = "+";
+                        colorMajor = new Color(.2f, 1f, .2f);
+                        colorMinor = new Color(.8f, 1f, .8f);
+                        break;
+                    case ChangelogSectionType.Changed:
+                        changePrefix = ">";
+                        colorMajor = new Color(1f, 1f, .2f);
+                        colorMinor = new Color(1f, 1f, .8f);
+                        break;
+                    case ChangelogSectionType.Removed:
+                        changePrefix = "-";
+                        colorMajor = new Color(1f, .2f, .2f);
+                        colorMinor = new Color(1f, .8f, .8f);
+                        break;
+                    case ChangelogSectionType.Fixed:
+                        changePrefix = "~";
+                        colorMajor = new Color(.2f, .6f, 1f);
+                        colorMinor = new Color(.8f, .9f, 1f);
+                        break;
+                    case ChangelogSectionType.Bugs:
+                        changePrefix = "×";
+                        colorMajor = new Color(1f, .6f, .2f);
+                        colorMinor = new Color(1f, .9f, .8f);
+                        break;
+                }
+
+                var header = new Label();
+                header.AddToClassList("base");
+                header.AddToClassList("label");
+                header.AddToClassList("label-header");
+                header.style.color = colorMajor;
+                header.text = section.Type.ToString();
+
+                uiFoldout.Add(header);
+
+                foreach (var change in section.Changes)
+                {
+                    var label = new Label();
+                    label.AddToClassList("base");
+                    label.AddToClassList("label");
+                    label.AddToClassList("label-info");
+                    label.style.color = colorMinor;
+                    label.style.marginLeft = 50 * change.Indention;
+                    label.text = $"<b>{changePrefix}</b> {Regex.Replace(change.Text, @"\[.+?\]\(.+?\) ?| ?\[.+?\]\(.+?\)|`", "")}";
+
+                    uiFoldout.Add(label);
+                }
+            }
+
+            uiFoldout.value = false;
+            panelMenuChangelog.Add(uiFoldout);
+        }
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (uiManager.GetActiveWindows().Length > 0)
+            {
+                uiManager.CloseWindow("#top");
+                if (!uiManager.GetWindow("menu").Active)
+                {
+                }
+            }
+            else
+            {
+                uiManager.OpenWindow("menu");
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.Slash))
+        {
+            uiManager.ToggleWindow("hacks");
+        }
+
+        // If any UI windows are visible, pause the game
+        if (uiManager.IsAnyWindowOpen() && !gameManager.Paused)
+        {
+            gameManager.Pause();
+        }
+        else if (uiManager.IsAllWindowsClosed() && gameManager.Paused)
+        {
+            gameManager.Unpause();
+        }
+    }
+}
 
 public class UIManager
 {
@@ -211,358 +588,6 @@ public class UIManager
     public bool IsActiveWindowValid(string id)
     {
         return IsActiveWindowValid(GetWindow(id));
-    }
-}
-
-public class UIController : MonoBehaviour
-{
-    [Header("Object References")]
-    public GameManager gameManager;
-    public InputManager inputManager;
-
-    // Message group
-    public VisualElement containerMessage;
-    public Label messageLabel;
-
-    // Menu group
-    public VisualElement containerMenu;
-    public VisualElement panelMenu;
-    public Button menuButtonContinue;
-    public Button menuButtonLevelSelector;
-    public Button menuButtonPrev;
-    public Button menuButtonRestart;
-    public Button menuButtonNext;
-    public Button menuButtonSettings;
-    public Button menuButtonChangelog;
-    public Button menuButtonHelp;
-    public Button menuButtonMainMenu;
-    public Button menuButtonExit;
-
-    // Settings group
-    public VisualElement containerMenuSettings;
-    public VisualElement panelMenuSettings;
-    public Button menuSettingsButtonSaveChanges;
-    public Button menuSettingsButtonDiscardChanges;
-    public Foldout menuSettingsFoldoutControls;
-    public TextField menuSettingsControlsPlayer1MoveUp;
-    public TextField menuSettingsControlsPlayer1MoveDown;
-    public TextField menuSettingsControlsPlayer1MoveLeft;
-    public TextField menuSettingsControlsPlayer1MoveRight;
-    public TextField menuSettingsControlsPlayer1Ability;
-    public TextField menuSettingsControlsPlayer2MoveUp;
-    public TextField menuSettingsControlsPlayer2MoveDown;
-    public TextField menuSettingsControlsPlayer2MoveLeft;
-    public TextField menuSettingsControlsPlayer2MoveRight;
-    public TextField menuSettingsControlsPlayer2Ability;
-    public Foldout menuSettingsFoldoutGraphics;
-    public Toggle menuSettingsGraphicsParticlesEffects;
-    public Toggle menuSettingsGraphicsParticlesAmbient;
-
-    // Help group
-    public VisualElement containerMenuHelp;
-    public VisualElement panelMenuHelp;
-
-    // Changelog group
-    public VisualElement containerMenuChangelog;
-    public VisualElement panelMenuChangelog;
-
-    private UIManager uiManager;
-    private bool loadedChangelog = false;
-
-    void Start()
-    {
-        var root = GetComponent<UIDocument>().rootVisualElement;
-
-        // Message group
-        containerMessage = root.Q<VisualElement>("container-message");
-        messageLabel = containerMessage.Q<Label>("message-label");
-
-        // Menu group
-        containerMenu = root.Q<VisualElement>("container-menu");
-        panelMenu = containerMenu.Q<VisualElement>("panel-menu");
-        menuButtonContinue = panelMenu.Q<Button>("menu-button-continue");
-        menuButtonLevelSelector = panelMenu.Q<Button>("menu-button-level-selector");
-        menuButtonPrev = panelMenu.Q<Button>("menu-button-prev");
-        menuButtonRestart = panelMenu.Q<Button>("menu-button-restart");
-        menuButtonNext = panelMenu.Q<Button>("menu-button-next");
-        menuButtonSettings = panelMenu.Q<Button>("menu-button-settings");
-        menuButtonChangelog = panelMenu.Q<Button>("menu-button-changelog");
-        menuButtonHelp = panelMenu.Q<Button>("menu-button-help");
-        menuButtonMainMenu = panelMenu.Q<Button>("menu-button-main-menu");
-        menuButtonExit = panelMenu.Q<Button>("menu-button-exit");
-
-        menuButtonContinue.clicked += ActMenuContinue;
-        menuButtonLevelSelector.clicked += ActMenuLevelSelector;
-        menuButtonPrev.clicked += ActMenuPrev;
-        menuButtonRestart.clicked += ActMenuRestart;
-        menuButtonNext.clicked += ActMenuNext;
-        menuButtonSettings.clicked += ActMenuSettings;
-        menuButtonChangelog.clicked += ActMenuChangelog;
-        menuButtonHelp.clicked += ActMenuHelp;
-        menuButtonMainMenu.clicked += ActMenuMainMenu;
-        menuButtonExit.clicked += ActMenuExit;
-
-        // Settings group
-        containerMenuSettings = root.Q<VisualElement>("container-menu-settings");
-        panelMenuSettings = containerMenuSettings.Q<VisualElement>("panel-menu-settings");
-        menuSettingsButtonSaveChanges = panelMenuSettings.Q<Button>("menu-settings-button-save-changes");
-        menuSettingsButtonDiscardChanges = panelMenuSettings.Q<Button>("menu-settings-button-discard-changes");
-        menuSettingsFoldoutControls = panelMenuSettings.Q<Foldout>("menu-settings-foldout-controls");
-        menuSettingsControlsPlayer1MoveUp = panelMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-up");
-        menuSettingsControlsPlayer1MoveDown = panelMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-down");
-        menuSettingsControlsPlayer1MoveLeft = panelMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-left");
-        menuSettingsControlsPlayer1MoveRight = panelMenuSettings.Q<TextField>("menu-settings-controls-player-1-move-right");
-        menuSettingsControlsPlayer1Ability = panelMenuSettings.Q<TextField>("menu-settings-controls-player-1-ability");
-        menuSettingsControlsPlayer2MoveUp = panelMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-up");
-        menuSettingsControlsPlayer2MoveDown = panelMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-down");
-        menuSettingsControlsPlayer2MoveLeft = panelMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-left");
-        menuSettingsControlsPlayer2MoveRight = panelMenuSettings.Q<TextField>("menu-settings-controls-player-2-move-right");
-        menuSettingsControlsPlayer2Ability = panelMenuSettings.Q<TextField>("menu-settings-controls-player-2-ability");
-        menuSettingsFoldoutGraphics = panelMenuSettings.Q<Foldout>("menu-settings-foldout-graphics");
-        menuSettingsGraphicsParticlesEffects = panelMenuSettings.Q<Toggle>("menu-settings-graphics-particles-effects");
-        menuSettingsGraphicsParticlesAmbient = panelMenuSettings.Q<Toggle>("menu-settings-graphics-particles-ambient");
-
-        menuSettingsButtonSaveChanges.clicked += ActMenuSettingsSaveChanges;
-        menuSettingsButtonDiscardChanges.clicked += ActMenuSettingsDiscardChanges;
-
-        // Help group
-        containerMenuHelp = root.Q<VisualElement>("container-menu-help");
-        panelMenuHelp = containerMenuHelp.Q<ScrollView>("panel-menu-help");
-
-        // Changelog group
-        containerMenuChangelog = root.Q<VisualElement>("container-menu-changelog");
-        panelMenuChangelog = containerMenuChangelog.Q<ScrollView>("panel-menu-changelog");
-
-
-        // Set up UI system
-        containerMessage.visible = false;
-        var uiWindowMenu = new UIWindow("menu", 0, containerMenu);
-        var uiWindowMenuSettings = new UIWindow("menu.settings", 1, containerMenuSettings, uiWindowMenu);
-        var uiWindowMenuHelp = new UIWindow("menu.help", 1, containerMenuHelp, uiWindowMenu);
-        var uiWindowMenuChangelog = new UIWindow("menu.changelog", 1, containerMenuChangelog, uiWindowMenu);
-        uiManager = new UIManager(new UIWindow[] { uiWindowMenu, uiWindowMenuSettings, uiWindowMenuHelp, uiWindowMenuChangelog });
-
-        LoadSettings();
-    }
-
-    private void ActMenuContinue()
-    {
-        uiManager.CloseWindow("menu");
-    }
-
-    private void ActMenuLevelSelector()
-    {
-        Debug.LogWarning("menu:@level-selector");
-    }
-
-    private void ActMenuPrev()
-    {
-        Debug.LogWarning("menu:@previous");
-    }
-
-    private void ActMenuRestart()
-    {
-        gameManager.ReloadGame();
-    }
-
-    private void ActMenuNext()
-    {
-        Debug.LogWarning("menu:@next");
-    }
-
-    private void ActMenuSettings()
-    {
-        uiManager.OpenWindow("menu.settings");
-    }
-
-    private void ActMenuHelp()
-    {
-        uiManager.OpenWindow("menu.help");
-    }
-
-    private void ActMenuChangelog()
-    {
-        uiManager.OpenWindow("menu.changelog");
-        if (!loadedChangelog)
-        {
-            LoadChangelog();
-            loadedChangelog = true;
-        }
-    }
-
-    private void ActMenuMainMenu()
-    {
-        Debug.LogWarning("menu:@main-menu");
-    }
-
-    private void ActMenuExit()
-    {
-        Application.Quit();
-    }
-
-    private void ActMenuSettingsSaveChanges()
-    {
-        SaveSettings();
-        inputManager.UpdateKeybinds();
-    }
-
-    private void ActMenuSettingsDiscardChanges()
-    {
-        LoadSettings();
-    }
-
-    public void ShowWinText(int playerNum, Color playerColor)
-    {
-        containerMessage.visible = true;
-        messageLabel.text = $"Player {playerNum} wins!";
-        messageLabel.style.color = playerColor;
-    }
-
-    public void SaveSettings()
-    {
-        PlayerPrefs.SetString("controls.player_1.move.up", menuSettingsControlsPlayer1MoveUp.value);
-        PlayerPrefs.SetString("controls.player_1.move.down", menuSettingsControlsPlayer1MoveDown.value);
-        PlayerPrefs.SetString("controls.player_1.move.left", menuSettingsControlsPlayer1MoveLeft.value);
-        PlayerPrefs.SetString("controls.player_1.move.right", menuSettingsControlsPlayer1MoveRight.value);
-        PlayerPrefs.SetString("controls.player_1.ability", menuSettingsControlsPlayer1Ability.value);
-        PlayerPrefs.SetString("controls.player_2.move.up", menuSettingsControlsPlayer2MoveUp.value);
-        PlayerPrefs.SetString("controls.player_2.move.down", menuSettingsControlsPlayer2MoveDown.value);
-        PlayerPrefs.SetString("controls.player_2.move.left", menuSettingsControlsPlayer2MoveLeft.value);
-        PlayerPrefs.SetString("controls.player_2.move.right", menuSettingsControlsPlayer2MoveRight.value);
-        PlayerPrefs.SetString("controls.player_2.ability", menuSettingsControlsPlayer2Ability.value);
-        PlayerPrefs.SetInt("graphics.particles.effects", menuSettingsGraphicsParticlesEffects.value ? 1 : 0);
-        PlayerPrefs.SetInt("graphics.particles.ambient", menuSettingsGraphicsParticlesEffects.value ? 1 : 0);
-    }
-
-    public void LoadSettings()
-    {
-        menuSettingsControlsPlayer1MoveUp.value = PlayerPrefs.GetString("controls.player_1.move.up");
-        menuSettingsControlsPlayer1MoveDown.value = PlayerPrefs.GetString("controls.player_1.move.down");
-        menuSettingsControlsPlayer1MoveLeft.value = PlayerPrefs.GetString("controls.player_1.move.left");
-        menuSettingsControlsPlayer1MoveRight.value = PlayerPrefs.GetString("controls.player_1.move.right");
-        menuSettingsControlsPlayer1Ability.value = PlayerPrefs.GetString("controls.player_1.ability");
-        menuSettingsControlsPlayer2MoveUp.value = PlayerPrefs.GetString("controls.player_2.move.up");
-        menuSettingsControlsPlayer2MoveDown.value = PlayerPrefs.GetString("controls.player_2.move.down");
-        menuSettingsControlsPlayer2MoveLeft.value = PlayerPrefs.GetString("controls.player_2.move.left");
-        menuSettingsControlsPlayer2MoveRight.value = PlayerPrefs.GetString("controls.player_2.move.right");
-        menuSettingsControlsPlayer2Ability.value = PlayerPrefs.GetString("controls.player_2.ability");
-        menuSettingsGraphicsParticlesEffects.value = PlayerPrefs.GetInt("graphics.particles.effects") == 1;
-        menuSettingsGraphicsParticlesAmbient.value = PlayerPrefs.GetInt("graphics.particles.ambient") == 1;
-    }
-
-    public void LoadChangelog()
-    {
-        // Load CHANGELOG.mdfile from github url
-        var changelogFileUrl = "https://raw.githubusercontent.com/XVNexus/brutalsky/main/CHANGELOG.md";
-        var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue
-        {
-            NoCache = true
-        };
-        var changelogFile = "";
-        using (HttpResponseMessage httpResponse = httpClient.GetAsync(changelogFileUrl).Result)
-        {
-            var content = httpResponse.Content;
-            changelogFile = content.ReadAsStringAsync().Result;
-        }
-
-        // Parse changelog file into a tree structure
-        var changelog = Changelog.ParseMarkdown(changelogFile);
-
-        // Generate changelog UI from tree
-        foreach (var version in changelog.Versions)
-        {
-            var uiFoldout = new Foldout();
-            uiFoldout.AddToClassList("base");
-            uiFoldout.AddToClassList("foldout");
-            uiFoldout.style.height = StyleKeyword.Auto;
-            uiFoldout.style.unityFontStyleAndWeight = FontStyle.Bold;
-
-            var versionTitle = $"V {version.Major}.{version.Minor}";
-            versionTitle += version.IsPatch ? $".{version.Patch}" : "";
-            versionTitle += version.HasName ? $" // {version.Name}" : "";
-            uiFoldout.text = versionTitle;
-            uiFoldout.style.unityFontStyleAndWeight = !version.IsPatch ? FontStyle.Bold : FontStyle.BoldAndItalic;
-
-            foreach (var section in version.Sections)
-            {
-                var changePrefix = "";
-                var colorMajor = new Color();
-                var colorMinor = new Color();
-                switch (section.Type)
-                {
-                    case ChangelogSectionType.Added:
-                        changePrefix = "+";
-                        colorMajor = new Color(.2f, 1f, .2f);
-                        colorMinor = new Color(.8f, 1f, .8f);
-                        break;
-                    case ChangelogSectionType.Changed:
-                        changePrefix = ">";
-                        colorMajor = new Color(1f, 1f, .2f);
-                        colorMinor = new Color(1f, 1f, .8f);
-                        break;
-                    case ChangelogSectionType.Removed:
-                        changePrefix = "-";
-                        colorMajor = new Color(1f, .2f, .2f);
-                        colorMinor = new Color(1f, .8f, .8f);
-                        break;
-                    case ChangelogSectionType.Fixed:
-                        changePrefix = "~";
-                        colorMajor = new Color(.2f, .6f, 1f);
-                        colorMinor = new Color(.8f, .9f, 1f);
-                        break;
-                    case ChangelogSectionType.Bugs:
-                        changePrefix = "×";
-                        colorMajor = new Color(1f, .6f, .2f);
-                        colorMinor = new Color(1f, .9f, .8f);
-                        break;
-                }
-
-                var header = new Label();
-                header.AddToClassList("base");
-                header.AddToClassList("label");
-                header.AddToClassList("label-header");
-                header.style.color = colorMajor;
-                header.text = section.Type.ToString();
-
-                uiFoldout.Add(header);
-
-                foreach (var change in section.Changes)
-                {
-                    var label = new Label();
-                    label.AddToClassList("base");
-                    label.AddToClassList("label");
-                    label.AddToClassList("label-info");
-                    label.style.color = colorMinor;
-                    label.style.marginLeft = 50 * change.Indention;
-                    label.text = $"<b>{changePrefix}</b> {Regex.Replace(change.Text, @"\[.+?\]\(.+?\) ?| ?\[.+?\]\(.+?\)|`", "")}";
-
-                    uiFoldout.Add(label);
-                }
-            }
-
-            uiFoldout.value = false;
-            panelMenuChangelog.Add(uiFoldout);
-        }
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (uiManager.GetActiveWindows().Length > 0)
-            {
-                uiManager.CloseWindow("#top");
-            }
-            else
-            {
-                uiManager.OpenWindow("menu");
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.Slash))
-        {
-            uiManager.ToggleWindow("hacks");
-        }
     }
 }
 
